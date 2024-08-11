@@ -9,7 +9,7 @@ const routes = [
     },
     {   
         name: 'Requests',
-        path: '/requests',
+        path: '/',
         component: () => import('../components/RequestsList.vue'),
     },
     {

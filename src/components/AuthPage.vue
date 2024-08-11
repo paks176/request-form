@@ -71,7 +71,6 @@ export default {
   name: "AuthPage",
   data() {
     return {
-      loginField: null,
       loginValue: '',
       passwordField: null,
       passwordValue: '',
@@ -106,14 +105,11 @@ export default {
     submitForm() {
       this.loading = true;
       setTimeout(() => {
-        // const data = new FormData();
-        // data.append('username', this.loginValue);
-        // data.append('password', this.passwordValue);
-        
         const data = {
           'username': this.loginValue,
           'password': this.passwordValue,
         }
+        console.log(data)
         this.sendAuthRequest(data).then(() => {
           if (this.getAuthStatus) {
             this.messageField.classList.replace('text-danger', 'green-text-2')

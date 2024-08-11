@@ -18,6 +18,11 @@
   padding: 1.25rem;
 }
 
+.py-7 {
+  padding-top: 0.625rem;
+  padding-bottom: 0.625rem;
+}
+
 .me-6 {
   margin-right: 0.75rem;
 }
