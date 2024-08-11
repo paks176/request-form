@@ -1,19 +1,16 @@
 <template>
   <div id="app">
-    <Component :is="currentComponent"/>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import AuthPage from './components/AuthPage.vue';
-import RequestsList from './components/RequestsList.vue';
 import { mapGetters } from "vuex";
+import router from "@/router";
 
 export default {
   name: 'App',
   components: {
-    AuthPage,
-    RequestsList
   },
   data() {
     return {
@@ -25,9 +22,9 @@ export default {
   },
   mounted() {
     if (this.getAuthStatus) {
-      this.currentComponent = RequestsList;
+      router.push({name: 'Requests'});
     } else {
-      this.currentComponent = AuthPage;
+      router.push({name: 'Login'});
     }
   }
 }

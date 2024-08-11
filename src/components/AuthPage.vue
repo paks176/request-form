@@ -3,9 +3,12 @@
     <div class="modal fade" id="auth-modal" tabindex="-1" role="dialog" aria-labelledby="auth-modalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content p-6">
+          <div v-show="loading" class="position-absolute loader border-radius-8 ease-animation">
+            <img width="128" height="64" src="@/assets/images/loader.gif" alt="Загрузка">
+          </div>
           <div class="modal-content__header border-radius-5 p-3">Авторизация</div>
           <div class="modal-content__body">
-            <form action="#">
+            <form action="#" @submit.prevent="submitForm">
               <div class="modal-inputs mb-4">
 
                 <!--  login   -->
@@ -24,19 +27,19 @@
                             fill="#757575"/>
                       </g>
                     </svg>
-                    <input required type="text" @input="telPrefix" v-model="loginField">
+                    <input required type="text" v-model="loginValue">
                   </div>
                 </div>
                 <!--  password  -->
                 <div id="auth-password" class="modal-inputs__item pb-2 mb-2">
-                  <div class="modal-inputs__item--message mb-2">&nbsp;</div>
+                  <div class="modal-inputs__item--message mb-2 text-center text-danger">&nbsp;</div>
                   <div class="d-flex">
                     <svg class="me-2 flex-shrink-0" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path
                           d="M6.616 21C6.17133 21 5.791 20.8417 5.475 20.525C5.159 20.2083 5.00067 19.8287 5 19.386V10.616C5 10.172 5.15833 9.792 5.475 9.476C5.79167 9.16 6.17167 9.00133 6.615 9H8V7C8 5.886 8.38833 4.941 9.165 4.165C9.941 3.38833 10.886 3 12 3C13.114 3 14.0593 3.38833 14.836 4.165C15.6127 4.94167 16.0007 5.88667 16 7V9H17.385C17.829 9 18.209 9.15833 18.525 9.475C18.841 9.79167 18.9993 10.1717 19 10.615V19.385C19 19.829 18.8417 20.209 18.525 20.525C18.2083 20.841 17.8283 20.9993 17.385 21H6.616ZM12 16.5C12.422 16.5 12.7773 16.3553 13.066 16.066C13.3553 15.7773 13.5 15.422 13.5 15C13.5 14.578 13.3553 14.2227 13.066 13.934C12.7767 13.6453 12.4213 13.5007 12 13.5C11.5787 13.4993 11.2233 13.644 10.934 13.934C10.6447 14.2227 10.5 14.578 10.5 15C10.5 15.422 10.6447 15.7773 10.934 16.066C11.2227 16.3553 11.578 16.5 12 16.5ZM9 9H15V7C15 6.16667 14.7083 5.45833 14.125 4.875C13.5417 4.29167 12.8333 4 12 4C11.1667 4 10.4583 4.29167 9.875 4.875C9.29167 5.45833 9 6.16667 9 7V9Z"
                           fill="#757575"/>
                     </svg>
-                    <input required type="password">
+                    <input required type="password" v-model="passwordValue">
                     <button id="switchButton" @click.prevent="switchPasswordVisibility" class="p-0">
                       <svg class="me-6" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
@@ -60,16 +63,26 @@
 
 <script>
 import { Modal } from 'bootstrap';
+import { mapActions } from "vuex";
+import { mapGetters } from "vuex";
 
 export default {
   name: "AuthPage",
   data() {
     return {
-      loginField: "",
+      loginField: null,
+      loginValue: '',
       passwordField: null,
+      passwordValue: '',
+      messageField: null,
+      loading: false,
     }
   },
+  computed: {
+    ...mapGetters(['getAuthStatus']),
+  },
   methods: {
+    ...mapActions(['sendAuthRequest']),
     switchPasswordVisibility() {
       if (this.passwordField) {
         const switchButton = this.$el.querySelector('#switchButton');
@@ -82,18 +95,37 @@ export default {
         }
       }
     },
-    telPrefix() {
-      if (!this.loginField.startsWith('+7')) {
-        if (this.loginField.match(/\d+/) !== null) {
-          this.loginField = '+7' + this.loginField;
-        }
-      }
+    // telPrefix() {
+    //   if (!this.loginValue.startsWith('+7')) {
+    //     if (this.loginValue.match(/\d+/) !== null) {
+    //       this.loginValue = '+7' + this.loginValue;
+    //     }
+    //   }
+    // },
+    submitForm() {
+      this.loading = true;
+      setTimeout(() => {
+        const data = new FormData();
+        data.append('login', this.loginValue);
+        data.append('password', this.passwordValue);
+        this.sendAuthRequest(data).then(() => {
+          if (this.getAuthStatus) {
+            console.log('success login!');
+            this.loading = false;
+            
+          } else {
+            if (this.messageField) {
+              this.messageField.innerText = 'Неверные данные для входа';
+              this.loading = false;
+            }
+          }
+        })
+      }, 1000)
+
     }
   },
-  watch: {
-
-  },
   mounted() {
+    this.messageField = this.$el.querySelector('#auth-password .modal-inputs__item--message');
     this.passwordField = this.$el.querySelector('#auth-password input');
     const authModal = Modal.getOrCreateInstance(document.querySelector('#auth-modal'), {
       backdrop: false,
@@ -101,6 +133,9 @@ export default {
       focus: true,
     });
     authModal.show();
+  },
+  getAuthStatus() {
+    
   }
 }
 </script>
