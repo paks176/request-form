@@ -21,7 +21,7 @@ export default new Vuex.Store({
                     context.commit("setAuthorized", false);
                 }
             }).catch(error => {
-                console.log(error);
+                console.log(error)
             })
         }
     },

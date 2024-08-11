@@ -65,6 +65,7 @@
 import { Modal } from 'bootstrap';
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
+import router from "@/router";
 
 export default {
   name: "AuthPage",
@@ -105,14 +106,20 @@ export default {
     submitForm() {
       this.loading = true;
       setTimeout(() => {
-        const data = new FormData();
-        data.append('login', this.loginValue);
-        data.append('password', this.passwordValue);
+        // const data = new FormData();
+        // data.append('username', this.loginValue);
+        // data.append('password', this.passwordValue);
+        
+        const data = {
+          'username': this.loginValue,
+          'password': this.passwordValue,
+        }
         this.sendAuthRequest(data).then(() => {
           if (this.getAuthStatus) {
-            console.log('success login!');
+            this.messageField.classList.replace('text-danger', 'green-text-2')
+            this.messageField.innerText = 'Успешный вход';
             this.loading = false;
-            
+            router.push({ name: 'Requests' });
           } else {
             if (this.messageField) {
               this.messageField.innerText = 'Неверные данные для входа';
