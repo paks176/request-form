@@ -1,0 +1,56 @@
+.border-radius-4 {
+  border-radius: 4px;
+}
+
+.border-radius-5 {
+  border-radius: 5px;
+}
+
+.border-radius-8 {
+  border-radius: 8px;
+}
+
+.p-6 {
+  padding: 1.25rem;
+}
+
+.me-6 {
+  margin-right: 0.75rem;
+}
+
+html > * {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #333;
+  font-weight: 400;
+  line-height: 143%;
+}
+
+body {
+  min-height: 100vh;
+}
+
+#app {
+  min-height: 100vh;
+  background-color: #eee;
+}
+
+.main-button {
+  display: block;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  color: #FFFFFF;
+  background-color: #50b053;
+  border: none;
+  box-shadow: 0 4px 4px 0 rgba(106, 174, 94, 0.25);
+}
+
+.green-text-1 {
+  color: #44A248;
+}
+
+.green-text-2 {
+  color: #50b053;
+}
+
+/*# sourceMappingURL=styles.css.map */

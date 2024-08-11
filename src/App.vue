@@ -1,28 +1,37 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <Component :is="currentComponent"/>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import AuthPage from './components/AuthPage.vue';
+import RequestsList from './components/RequestsList.vue';
+import { mapGetters } from "vuex";
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    AuthPage,
+    RequestsList
+  },
+  data() {
+    return {
+      currentComponent: null,
+    }
+  },
+  computed: {
+    ...mapGetters(['getAuthStatus'])
+  },
+  mounted() {
+    if (this.getAuthStatus) {
+      this.currentComponent = RequestsList;
+    } else {
+      this.currentComponent = AuthPage;
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>
