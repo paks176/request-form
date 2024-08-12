@@ -27,6 +27,14 @@
   margin-right: 0.75rem;
 }
 
+.mb-6 {
+  margin-bottom: 2rem;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
 html > * {
   font-family: "Inter", sans-serif;
   font-size: 14px;
