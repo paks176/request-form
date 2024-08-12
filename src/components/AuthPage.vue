@@ -109,7 +109,6 @@ export default {
           'username': this.loginValue,
           'password': this.passwordValue,
         }
-        console.log(data)
         this.sendAuthRequest(data).then(() => {
           if (this.getAuthStatus) {
             this.messageField.classList.replace('text-danger', 'green-text-2')

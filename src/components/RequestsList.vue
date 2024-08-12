@@ -165,8 +165,21 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from "vuex";
+
 export default {
-  name: "RequestsList"
+  name: "RequestsList",
+  computed: {
+    ...mapGetters(["getList"]),
+  },
+  methods: {
+    ...mapActions(["sendAppealsRequest"]),
+  },
+  mounted() {
+    this.sendAppealsRequest().then(res => {
+      console.log(res)
+    });
+  }
 }
 </script>
 
