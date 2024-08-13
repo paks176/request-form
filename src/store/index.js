@@ -1,5 +1,5 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import Vue from "vue";
+import Vuex from "vuex";
 import axios from "axios";
 
 Vue.use(Vuex);
@@ -7,16 +7,16 @@ Vue.use(Vuex);
 export default new Vuex.Store({
     state: {
         authorized: false,
-        authData: '',
-        list: null,
+        authData: "",
+        appealsData: {},
     },
     actions: {
         sendAuthRequest(context, body) {
             return axios.post(
-                'https://dev.moydomonline.ru/api/auth/login/',
+                "https://dev.moydomonline.ru/api/auth/login/",
                 body,
                 {
-                    headers: {'Content-Type': 'multipart/form-data'}
+                    headers: {"Content-Type": "multipart/form-data"}
                 }).then(response => {
                 if (response.status === 200) {
                     context.commit("setAuthorized", true);
@@ -27,17 +27,24 @@ export default new Vuex.Store({
                 console.log(error)
             })
         },
-        sendAppealsRequest(context) {
-            return axios.get(
-                'https://dev.moydomonline.ru/api/appeals/v1.0/appeals/',
-                {
-                    headers: {'Authorization' : `Basic ${context.state.authData}`},
+        sendAppealsRequest(context, params) {
+            const queryParams = params ? "?" + (new URLSearchParams(params)).toString() : "";
+            return fetch(
+                `https://dev.moydomonline.ru/api/appeals/v1.0/appeals${queryParams}`,
+                {   
+                    method: "GET",
+                    headers: { "Authorization" : `Basic ${context.state.authData}` },
                 })
                 .then(response => {
                     if (response.status === 200) {
-                        console.log(response.data)
-                        context.commit("setList", response.data);
+                        return response.json()
+                            .then(data => {
+                                console.log(data)
+                                context.commit("setAppealsData", data);
+                            })
                     }
+                }).catch(error => {
+                    console.log(error);
                 })
         }
     },
@@ -48,8 +55,8 @@ export default new Vuex.Store({
         encodeAuthData(state, data) {
             state.authData = Vue.prototype.$bytesToBase64(new TextEncoder().encode(data));
         },
-        setList(state, list) {
-            state.list = list;
+        setAppealsData(state, data) {
+            state.appealsData = data;
         }
     },
     getters: {
@@ -59,8 +66,8 @@ export default new Vuex.Store({
         decodeAuthData: state => {
             return new TextDecoder().decode(Vue.prototype.$base64ToBytes(state.authData));
         },
-        getList: state => {
-            return state.list
+        getAppealsList(state) {
+            return state.appealsData;
         },
     }
 });
