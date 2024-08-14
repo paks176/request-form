@@ -136,9 +136,6 @@ export default {
     });
     authModal.show();
   },
-  getAuthStatus() {
-    
-  }
 }
 </script>
 

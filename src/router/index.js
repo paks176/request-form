@@ -1,13 +1,14 @@
 import Vue from 'vue';
 import store from '@/store';
+import {Modal} from 'bootstrap';
 
 const routes = [
-    {   
+    {
         name: '404',
         path: '*',
         component: () => import('../components/PageError404.vue'),
     },
-    {   
+    {
         name: 'Requests',
         path: '/',
         component: () => import('../components/RequestsList.vue'),
@@ -26,14 +27,20 @@ const router = new VueRouter({
     routes
 });
 
-router.beforeEach((to,from, next) => {
+router.beforeEach((to, from, next) => {
     if (!store.getters.getAuthStatus && to.name !== 'Login') {
         next({
             name: 'Login',
             replace: true
         })
     } else {
-        next();
+        const authModal = Modal.getInstance('#auth-modal');
+        if (authModal) {
+            authModal.hide();
+        }
+        setTimeout(() => {
+            next();
+        }, 1000)
     }
 })
 

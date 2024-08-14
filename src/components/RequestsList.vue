@@ -2,14 +2,14 @@
   <div>
     <h1 class="py-4 px-5">Список заявок</h1>
     <div class="p-3">
-      <div class="request-table border-radius-8 px-3 py-7">
-        <Transition name="fade">
-          <div v-if="loading">
+      <div class="request-table position-relative border-radius-8 px-3 py-7">
+       
+          <div v-if="loading" class="loader position-absolute">
             <div class="w-100 h-100 d-flex align-items-center justify-content-center">
               <img width="192" height="96" src="@/assets/images/loader.gif" alt="Загрузка...">
             </div>
           </div>
-          <div v-else>
+ 
             <button class="main-button ms-auto mb-5">СОЗДАТЬ</button>
             <div class="d-flex mb-6">
               <div class="request-table__input d-flex pb-3 me-3">
@@ -136,22 +136,21 @@
                   </label>
                 </th>
               </tr>
-              <tr v-for="appeal in getAppealsList.results" :key="appeal.id">
+              <tr v-for="appeal in this.appealsData.results" :key="appeal.id">
                 <td>
                   <div class="border-radius-4">{{appeal.number}}</div>
                 </td>
-                <td>{{appeal.created_at}}</td>
-                <td>{{appeal.premise.address}}</td>
-                <td>Забавкин А.П.</td>
+                <td>{{appeal?.created_at ? getDate(appeal.created_at) : 'Данные отсутствуют'}}</td>
+                <td>{{appeal.premise?.address ? appeal.premise.address : 'Данные отсутствуют' }}</td>
+                <td>{{ getApplicant(appeal) }}</td>
                 <td>
-                  <p>Подкрасить царапины на стенах в гостиной.</p>
+                  <p>{{ appeal?.description ? appeal.description : 'Данные отсутствуют' }}</p>
                 </td>
-                <td>24.04.2024 10:00</td>
-                <td>Новая</td>
+                <td>{{ appeal?.due_date ? getDate(appeal.due_date) : 'Данные отсутствуют'}}</td>
+                <td>{{ appeal?.status?.name ? appeal.status.name : 'Данные отсутствуют' }}</td>
               </tr>
             </table>
-          </div>
-        </Transition>
+         
       </div>
     </div>
   </div>
@@ -167,24 +166,40 @@ export default {
   },
   data() {
     return {
-      appeals: {},
+      appealsData: {
+        results: [],
+      },
       loading: true
     }
   },
   methods: {
     ...mapActions(["sendAppealsRequest"]),
-    getAppealsQueryParams() {
+    getFilters() {
+      // здесь будут доставаться фильтры, которые юзер применял в прошлый раз
       return {
-        search: '',
-        premise_id: '',
-        page_size: '10',
-        page: '1',
+        page: "1",
+        page_size: "10",
       }
-    }
+    },
+    getApplicant(appeal) {
+      if (appeal.created_by) {
+         if (appeal.created_by.first_name && appeal.created_by.last_name) {
+           return appeal.created_by.first_name + " " + appeal.created_by.last_name
+         } else return appeal.created_by.username
+      } else return 'Данные отсутствуют'
+    },
+    getDate(date) {
+      if (date) {
+        return new Date(date).toISOString().slice(0, 16).replace('T', ' ').replaceAll('-', '.');
+      }
+    },
   },
   mounted() {
-    this.sendAppealsRequest(this.getAppealsQueryParams()).then(() => {
+    const filters = this.getFilters();
+    this.sendAppealsRequest(filters).then(() => {
       if (Object.keys(this.getAppealsList).length) {
+        this.$set(this.appealsData, 'results',this.getAppealsList?.results);
+        this.$router.push({path: this.$route.fullPath, query: filters})
         setTimeout(() => {
           this.loading = false;
         }, 1000)
