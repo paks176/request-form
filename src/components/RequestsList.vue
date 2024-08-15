@@ -26,7 +26,6 @@
                 </g>
               </svg>
             </button>
-            
           </div>
 
           <div class="request-table__input d-flex pb-3">
@@ -145,10 +144,10 @@
                 </label>
               </th>
             </tr>
-
+            
             <tr v-for="appeal in this.appealsData.results" :key="appeal.id">
               <td>
-                <div class="border-radius-4">{{ appeal.number }}</div>
+                <button class="border-radius-4 cursor-pointer" @click="showAppeal(appeal.id)">{{ appeal.number }}</button>
               </td>
               <td>{{ appeal?.created_at ? getDate(appeal.created_at) : 'Данные отсутствуют' }}</td>
               <td>{{ appeal.premise?.address ? appeal.premise.address : 'Данные отсутствуют' }}</td>
@@ -159,7 +158,6 @@
               <td>{{ appeal?.due_date ? getDate(appeal.due_date) : 'Данные отсутствуют' }}</td>
               <td>{{ appeal?.status?.name ? appeal.status.name : 'Данные отсутствуют' }}</td>
             </tr>
-
           </table>
         </div>
 
@@ -233,20 +231,27 @@
             </button>
           </div>
         </div>
-
       </div>
     </div>
+    <AppealModal :appealProps="this.modalProps" @clearProps="clearModalProps"/>
   </div>
 </template>
 
 <script>
 import {mapActions, mapGetters} from "vuex";
+import AppealModal from "@/components/AppealModal.vue";
 
 export default {
   name: "RequestsList",
+  
+  components: {
+    AppealModal,
+  },
+  
   computed: {
     ...mapGetters(["getAppealsList", "getAuthStatus", "getPremisesData"]),
   },
+  
   data() {
     return {
       loading: true,
@@ -274,8 +279,10 @@ export default {
       pageSizeSelect: null,
       premiseSelect: null,
       
+      modalProps: null,
     }
   },
+  
   methods: {
     ...mapActions(["sendAppealsRequest", "sendPremisesRequest"]),
 
@@ -422,8 +429,22 @@ export default {
       } else {
         return 0;
       }
+    },
+
+    showAppeal(id) {
+      if (id) {
+        const thisAppeal = this.appealsData.results.find((appeal) => appeal.id === id);
+        if (thisAppeal) {
+            this.modalProps = thisAppeal;
+        }
+      }
+    },
+
+    clearModalProps() {
+     this.modalProps = null; 
     }
   },
+  
   watch: {
     'currentQuery': {
       handler: function () {
@@ -433,6 +454,7 @@ export default {
     }
 
   },
+  
   mounted() {
     if (this.getAuthStatus) {
       this.premiseSelect = this.$el.querySelector('select#premiseSelect');
@@ -534,7 +556,7 @@ table {
       max-width: 260px;
     }
 
-    & div {
+    & button {
       width: min-content;
       color: #fff;
       background: #50b053;
