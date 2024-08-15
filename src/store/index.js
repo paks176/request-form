@@ -9,6 +9,7 @@ export default new Vuex.Store({
         authorized: false,
         authData: "",
         appealsData: {},
+        premisesData: {},
     },
     actions: {
         sendAuthRequest(context, body) {
@@ -27,6 +28,7 @@ export default new Vuex.Store({
                 console.log(error)
             })
         },
+        
         sendAppealsRequest(context, params) {
             const queryParams = params ? "?" + (new URLSearchParams(params)).toString() : "";
             return fetch(
@@ -45,7 +47,26 @@ export default new Vuex.Store({
                 }).catch(error => {
                     console.log(error);
                 })
-        }
+        },
+
+        sendPremisesRequest(context) {
+            return fetch(
+                'https://dev.moydomonline.ru/api/geo/v2.0/user-premises/',
+                {
+                    method: "GET",
+                    headers: { "Authorization" : `Basic ${context.state.authData}` },
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        return response.json()
+                            .then(data => {
+                                context.commit("setPremises", data);
+                            })
+                    }
+                }).catch(error => {
+                    console.log(error);
+                })
+        },
     },
     mutations: {
         setAuthorized(state, authorized) {
@@ -56,6 +77,9 @@ export default new Vuex.Store({
         },
         setAppealsData(state, data) {
             state.appealsData = data;
+        },
+        setPremises(state, data) {
+            state.premisesData = data;
         }
     },
     getters: {
@@ -68,5 +92,8 @@ export default new Vuex.Store({
         getAppealsList(state) {
             return state.appealsData;
         },
+        getPremisesData: state => {
+            return state.premisesData;
+        }
     }
 });

@@ -28,10 +28,9 @@
 
           <div class="request-table__input d-flex pb-3">
             <select class="w-100 cursor-pointer" name="" id="">
-              <option value="0">Дом</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
+              <option v-for="premise in this.premisesData.results" :key="premise.id" :value="premise.id">
+                {{ premise?.full_address }}
+              </option>
             </select>
           </div>
         </div>
@@ -240,7 +239,7 @@ import {mapActions, mapGetters} from "vuex";
 export default {
   name: "RequestsList",
   computed: {
-    ...mapGetters(["getAppealsList", "getAuthStatus"]),
+    ...mapGetters(["getAppealsList", "getAuthStatus", "getPremisesData"]),
   },
   data() {
     return {
@@ -255,6 +254,7 @@ export default {
         pages: '',
       },
       paginationBlock: {},
+      premisesData: [],
       currentQuery: {
         page_size: '10',
         page: '1'
@@ -264,7 +264,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["sendAppealsRequest"]),
+    ...mapActions(["sendAppealsRequest", "sendPremisesRequest"]),
     
     changePage(event) {
       const action = event.target.dataset.action;
@@ -376,6 +376,10 @@ export default {
   mounted() {
     if (this.getAuthStatus) {
       this.pageSizeSelect = this.$el.querySelector('select#pageSize');
+      this.sendPremisesRequest().then(() => {
+        console.log('result')
+        this.$set(this.premisesData, 'results', this.getPremisesData?.results);
+      })
       this.updateTable();
     } else {
       this.$router.push({name: 'Login'});
