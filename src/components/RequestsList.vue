@@ -13,144 +13,157 @@
         <button class="main-button ms-auto mb-5">СОЗДАТЬ</button>
         <div class="d-flex mb-6">
           <div class="request-table__input d-flex pb-3 me-3">
-            <input class="w-100 cursor-pointer" type="text" placeholder="Поиск (№ заявки, название)">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <mask id="mask0_2002_52" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-                <rect width="24" height="24" fill="#D9D9D9"/>
-              </mask>
-              <g mask="url(#mask0_2002_52)">
-                <path
-                    d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z"
-                    fill="#999999"/>
-              </g>
-            </svg>
+            <input class="w-100" type="text" placeholder="Поиск (№ заявки, название)" id="searchAppealInput" @input="searchAppealOnInput">
+            <button @click="searchAppealByClick">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <mask id="mask0_2002_52" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+                  <rect width="24" height="24" fill="#D9D9D9"/>
+                </mask>
+                <g mask="url(#mask0_2002_52)">
+                  <path
+                      d="M19.6 21L13.3 14.7C12.8 15.1 12.225 15.4167 11.575 15.65C10.925 15.8833 10.2333 16 9.5 16C7.68333 16 6.14583 15.3708 4.8875 14.1125C3.62917 12.8542 3 11.3167 3 9.5C3 7.68333 3.62917 6.14583 4.8875 4.8875C6.14583 3.62917 7.68333 3 9.5 3C11.3167 3 12.8542 3.62917 14.1125 4.8875C15.3708 6.14583 16 7.68333 16 9.5C16 10.2333 15.8833 10.925 15.65 11.575C15.4167 12.225 15.1 12.8 14.7 13.3L21 19.6L19.6 21ZM9.5 14C10.75 14 11.8125 13.5625 12.6875 12.6875C13.5625 11.8125 14 10.75 14 9.5C14 8.25 13.5625 7.1875 12.6875 6.3125C11.8125 5.4375 10.75 5 9.5 5C8.25 5 7.1875 5.4375 6.3125 6.3125C5.4375 7.1875 5 8.25 5 9.5C5 10.75 5.4375 11.8125 6.3125 12.6875C7.1875 13.5625 8.25 14 9.5 14Z"
+                      fill="#999999"/>
+                </g>
+              </svg>
+            </button>
+            
           </div>
 
           <div class="request-table__input d-flex pb-3">
-            <select class="w-100 cursor-pointer" name="" id="">
+            <select class="w-100 cursor-pointer" name="" id="premiseSelect" @change="choosePremise">
+              <option selected value="">Не выбрано</option>
               <option v-for="premise in this.premisesData.results" :key="premise.id" :value="premise.id">
                 {{ premise?.full_address }}
               </option>
             </select>
           </div>
         </div>
-        <table class="w-100 mb-6">
-          <tr>
-            <th class="cursor-pointer">
-              <label for="number">
-                <input type="checkbox" id="number" class="d-none">
-                №
-                <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-                    <rect width="16" height="16" fill="#D9D9D9"/>
-                  </mask>
-                  <g mask="url(#mask0_2026_108)">
-                    <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
-                  </g>
-                </svg>
-              </label>
-            </th>
-            <th class="cursor-pointer">
-              <label for="created_at">
-                <input type="checkbox" id="created_at" class="d-none">
-                Создана
-                <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-                    <rect width="16" height="16" fill="#D9D9D9"/>
-                  </mask>
-                  <g mask="url(#mask0_2026_108)">
-                    <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
-                  </g>
-                </svg>
-              </label>
-            </th>
-            <th class="cursor-pointer">
-              <label for="apartment">
-                <input type="checkbox" id="apartment" class="d-none">
-                Адрес
-                <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-                    <rect width="16" height="16" fill="#D9D9D9"/>
-                  </mask>
-                  <g mask="url(#mask0_2026_108)">
-                    <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
-                  </g>
-                </svg>
-              </label>
-            </th>
-            <th class="cursor-pointer">
-              <label for="applicant">
-                <input type="checkbox" id="applicant" class="d-none">
-                Заявитель
-                <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-                    <rect width="16" height="16" fill="#D9D9D9"/>
-                  </mask>
-                  <g mask="url(#mask0_2026_108)">
-                    <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
-                  </g>
-                </svg>
-              </label>
-            </th>
-            <th class="cursor-pointer">
-              <label for="description">
-                <input type="checkbox" id="description" class="d-none">
-                Описание
-                <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-                    <rect width="16" height="16" fill="#D9D9D9"/>
-                  </mask>
-                  <g mask="url(#mask0_2026_108)">
-                    <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
-                  </g>
-                </svg>
-              </label>
-            </th>
-            <th class="cursor-pointer">
-              <label for="due_date">
-                <input type="checkbox" id="due_date" class="d-none">
-                Срок
-                <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-                    <rect width="16" height="16" fill="#D9D9D9"/>
-                  </mask>
-                  <g mask="url(#mask0_2026_108)">
-                    <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
-                  </g>
-                </svg>
-              </label>
-            </th>
-            <th class="cursor-pointer">
-              <label for="status">
-                <input type="checkbox" id="status" class="d-none">
-                Статус
-                <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
-                    <rect width="16" height="16" fill="#D9D9D9"/>
-                  </mask>
-                  <g mask="url(#mask0_2026_108)">
-                    <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
-                  </g>
-                </svg>
-              </label>
-            </th>
-          </tr>
-          <tr v-for="appeal in this.appealsData.results" :key="appeal.id">
-            <td>
-              <div class="border-radius-4">{{ appeal.number }}</div>
-            </td>
-            <td>{{ appeal?.created_at ? getDate(appeal.created_at) : 'Данные отсутствуют' }}</td>
-            <td>{{ appeal.premise?.address ? appeal.premise.address : 'Данные отсутствуют' }}</td>
-            <td>{{ getApplicant(appeal) }}</td>
-            <td>
-              <p>{{ appeal?.description ? appeal.description : 'Данные отсутствуют' }}</p>
-            </td>
-            <td>{{ appeal?.due_date ? getDate(appeal.due_date) : 'Данные отсутствуют' }}</td>
-            <td>{{ appeal?.status?.name ? appeal.status.name : 'Данные отсутствуют' }}</td>
-          </tr>
-        </table>
 
-        <div class="d-flex justify-content-between">
+        <div v-if="!this.appealsData.results.length && !loading" class="p-5 d-flex justify-content-center align-items-center w-100">
+          <h2>Нет результатов</h2>
+        </div>
+        
+        <div v-else>
+          <table class="w-100 mb-6">
+            <tr>
+              <th class="cursor-pointer">
+                <label for="number">
+                  <input type="checkbox" id="number" class="d-none">
+                  №
+                  <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+                      <rect width="16" height="16" fill="#D9D9D9"/>
+                    </mask>
+                    <g mask="url(#mask0_2026_108)">
+                      <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
+                    </g>
+                  </svg>
+                </label>
+              </th>
+              <th class="cursor-pointer">
+                <label for="created_at">
+                  <input type="checkbox" id="created_at" class="d-none">
+                  Создана
+                  <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+                      <rect width="16" height="16" fill="#D9D9D9"/>
+                    </mask>
+                    <g mask="url(#mask0_2026_108)">
+                      <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
+                    </g>
+                  </svg>
+                </label>
+              </th>
+              <th class="cursor-pointer">
+                <label for="apartment">
+                  <input type="checkbox" id="apartment" class="d-none">
+                  Адрес
+                  <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+                      <rect width="16" height="16" fill="#D9D9D9"/>
+                    </mask>
+                    <g mask="url(#mask0_2026_108)">
+                      <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
+                    </g>
+                  </svg>
+                </label>
+              </th>
+              <th class="cursor-pointer">
+                <label for="applicant">
+                  <input type="checkbox" id="applicant" class="d-none">
+                  Заявитель
+                  <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+                      <rect width="16" height="16" fill="#D9D9D9"/>
+                    </mask>
+                    <g mask="url(#mask0_2026_108)">
+                      <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
+                    </g>
+                  </svg>
+                </label>
+              </th>
+              <th class="cursor-pointer">
+                <label for="description">
+                  <input type="checkbox" id="description" class="d-none">
+                  Описание
+                  <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+                      <rect width="16" height="16" fill="#D9D9D9"/>
+                    </mask>
+                    <g mask="url(#mask0_2026_108)">
+                      <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
+                    </g>
+                  </svg>
+                </label>
+              </th>
+              <th class="cursor-pointer">
+                <label for="due_date">
+                  <input type="checkbox" id="due_date" class="d-none">
+                  Срок
+                  <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+                      <rect width="16" height="16" fill="#D9D9D9"/>
+                    </mask>
+                    <g mask="url(#mask0_2026_108)">
+                      <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
+                    </g>
+                  </svg>
+                </label>
+              </th>
+              <th class="cursor-pointer">
+                <label for="status">
+                  <input type="checkbox" id="status" class="d-none">
+                  Статус
+                  <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
+                      <rect width="16" height="16" fill="#D9D9D9"/>
+                    </mask>
+                    <g mask="url(#mask0_2026_108)">
+                      <path class="ease-animation" d="M7.33333 12V5.86668L4.93333 8.26668L4 7.33334L8 3.33334L12 7.33334L11.0667 8.26668L8.66667 5.86668V12H7.33333Z" fill="#CCCCCC"/>
+                    </g>
+                  </svg>
+                </label>
+              </th>
+            </tr>
+
+            <tr v-for="appeal in this.appealsData.results" :key="appeal.id">
+              <td>
+                <div class="border-radius-4">{{ appeal.number }}</div>
+              </td>
+              <td>{{ appeal?.created_at ? getDate(appeal.created_at) : 'Данные отсутствуют' }}</td>
+              <td>{{ appeal.premise?.address ? appeal.premise.address : 'Данные отсутствуют' }}</td>
+              <td>{{ getApplicant(appeal) }}</td>
+              <td>
+                <p>{{ appeal?.description ? appeal.description : 'Данные отсутствуют' }}</p>
+              </td>
+              <td>{{ appeal?.due_date ? getDate(appeal.due_date) : 'Данные отсутствуют' }}</td>
+              <td>{{ appeal?.status?.name ? appeal.status.name : 'Данные отсутствуют' }}</td>
+            </tr>
+
+          </table>
+        </div>
+
+        <div v-if="this.paginationData.pages > 1" class="d-flex justify-content-between">
           <div class="d-flex align-items-center">
             <div class="me-3">
               <b>{{ (this.paginationData.page * this.paginationData.page_size) - (this.paginationData.page_size - 1) }}-{{ (this.paginationData.page * this.paginationData.page_size) }}</b>
@@ -165,7 +178,7 @@
             </select>
           </div>
           <div class="pagination d-flex align-items-center">
-            <button data-action="first" @click="changePage">
+            <button data-action="first" v-if="this.paginationData.page !== 1" @click="changePage">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_2038_827" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14" height="14">
                   <rect width="14" height="14" fill="#D9D9D9"/>
@@ -178,7 +191,7 @@
               </svg>
             </button>
 
-            <button data-action="prev" @click="changePage">
+            <button data-action="prev" v-if="this.paginationData.page_previous" @click="changePage">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_2038_834" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14" height="14">
                   <rect width="14" height="14" fill="#D9D9D9"/>
@@ -189,20 +202,13 @@
               </svg>
             </button>
 
-<!--            <div v-if="Number(this.paginationData.pages) <= 5" class="d-flex align-items-center">-->
-<!--              <button v-for="index in 5" :key="index" :data-action="getPagesArray() + index" @click="changePage">-->
-<!--                {{ index }}-->
-<!--              </button>-->
-<!--            </div>-->
-
             <div class="d-flex align-items-center">
-              <button v-for="index in 5" :key="index" :data-action="getPagesArray() + index" @click="changePage" :class="getCurrentPage(index) ? 'current' : ''">
+              <button v-for="index in getMaxPages()" :key="index" :data-action="getPagesArray() + index" @click="changePage" :class="getCurrentPage(index) ? 'current' : ''">
                 {{ getPagesArray() + index }}
               </button>
             </div>
 
-
-            <button data-action="next" @click="changePage">
+            <button data-action="next" v-if="this.paginationData.page_next" @click="changePage">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_2038_869" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
                   <rect width="16" height="16" fill="#D9D9D9"/>
@@ -213,7 +219,7 @@
               </svg>
             </button>
 
-            <button data-action="last" @click="changePage">
+            <button data-action="last" v-if="this.paginationData.page !== this.paginationData.pages" @click="changePage">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_2038_876" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
                   <rect width="16" height="16" fill="#D9D9D9"/>
@@ -243,8 +249,17 @@ export default {
   },
   data() {
     return {
+      loading: true,
+      
+      currentQuery: {
+        page_size: '10',
+        page: '1',
+        premise_id: '',
+        search: '',
+      },
       appealsData: {
-        results: [],
+        results: [
+        ],
       },
       paginationData: {
         page: '',
@@ -253,19 +268,46 @@ export default {
         page_size: '',
         pages: '',
       },
-      paginationBlock: {},
       premisesData: [],
-      currentQuery: {
-        page_size: '10',
-        page: '1'
-      },
-      loading: true,
+      
+      searchAppealInput: null,
       pageSizeSelect: null,
+      premiseSelect: null,
+      
     }
   },
   methods: {
     ...mapActions(["sendAppealsRequest", "sendPremisesRequest"]),
+
+    searchAppealOnInput() {
+      if (this.searchAppealInput) {
+        setTimeout(() => {
+          this.currentQuery.search = this.searchAppealInput.value;
+          this.currentQuery.page = 1;
+        }, 1000)
+      }
+    },
+
+    searchAppealByClick() {
+      if (this.searchAppealInput) {
+        this.currentQuery.search = this.searchAppealInput.value;
+        this.currentQuery.page = 1;
+      }
+    },
     
+    choosePremise() {
+      if (this.premiseSelect) {
+        const selected = this.premiseSelect.selectedIndex;
+        const value = this.premiseSelect[selected].value;
+        if (value) {
+          this.currentQuery.premise_id = value;
+        } else {
+          this.currentQuery.premise_id = '';
+        }
+        this.currentQuery.page = 1;
+      }
+    },
+
     changePage(event) {
       const action = event.target.dataset.action;
       const curPage = Number(this.currentQuery.page);
@@ -298,37 +340,51 @@ export default {
         }
       }
     },
-    
+
+    getMaxPages() {
+      if (this.paginationData.pages < 5) {
+        return this.paginationData.pages;
+      } else {
+        return 5;
+      }
+    },
+
     getCurrentPage(index) {
-      if (Number(this.paginationData.page) === this.getPagesArray() + index ) {
+      if (Number(this.paginationData.page) === this.getPagesArray() + index) {
         return true
       } else return false
     },
-    
+
     getApplicant(appeal) {
       if (appeal.created_by) {
         if (appeal.created_by.first_name && appeal.created_by.last_name) {
-          return appeal.created_by.first_name + " " + appeal.created_by.last_name
-        } else return appeal.created_by.username
-      } else return 'Данные отсутствуют'
+          const getName = (name) => {
+            if (name && name.startsWith('user_')) {
+              return name.split('_')[1];
+            } else return name;
+          }
+          return getName(appeal.created_by.first_name) + " " + getName(appeal.created_by.last_name);
+        } else return appeal.created_by.username;
+      } else return 'Данные отсутствуют';
     },
-    
+
     getDate(date) {
       if (date) {
         return new Date(date).toISOString().slice(0, 16).replace('T', ' ').replaceAll('-', '.');
       }
     },
-    
+
     changePageSize() {
       if (this.pageSizeSelect) {
         const selected = this.pageSizeSelect.selectedIndex;
         const value = this.pageSizeSelect[selected].value;
         if (value) {
           this.currentQuery.page_size = value;
+          this.currentQuery.page = 1;
         }
       }
     },
-    
+
     updateTable() {
       this.loading = true;
       this.sendAppealsRequest(this.currentQuery).then(() => {
@@ -339,28 +395,32 @@ export default {
           this.$set(this.paginationData, 'page_previous', this.getAppealsList?.page_previous);
           this.$set(this.paginationData, 'page_size', this.getAppealsList?.page_size);
           this.$set(this.paginationData, 'pages', this.getAppealsList?.pages);
+          this.pageSizeSelect = this.$el.querySelector('select#pageSize');
           this.$router.replace({query: this.currentQuery}).catch(() => {
           });
-
           setTimeout(() => {
             this.loading = false;
           }, 1000)
         }
       });
     },
-    
+
     getPagesArray() {
       const getLastElement = (page) => {
-        while (page % 5 !== 0 && page < Number(this.paginationData.pages)) {
-          page++
+        if (page >= 5 && this.paginationData.pages > 5) {
+          while (page % 5 !== 0 && page < Number(this.paginationData.pages)) {
+            page++
+          }
+          return page;
+        } else {
+          return page;
         }
-        return page;
       }
       const lastEl = getLastElement(Number(this.paginationData.page));
-      if (lastEl === 0 || lastEl - 5 !== 0) {
+      if (lastEl - 5 > 0) {
         return lastEl - 5
       } else {
-        return 0
+        return 0;
       }
     }
   },
@@ -375,9 +435,10 @@ export default {
   },
   mounted() {
     if (this.getAuthStatus) {
-      this.pageSizeSelect = this.$el.querySelector('select#pageSize');
+      this.premiseSelect = this.$el.querySelector('select#premiseSelect');
+      this.searchAppealInput = this.$el.querySelector('#searchAppealInput');
+      
       this.sendPremisesRequest().then(() => {
-        console.log('result')
         this.$set(this.premisesData, 'results', this.getPremisesData?.results);
       })
       this.updateTable();
@@ -406,6 +467,9 @@ h1 {
 }
 
 .request-table {
+  transition: all 0.5s ease;
+  min-height: calc(100vh - 172px);
+  margin-bottom: 100px;
   background-color: #FFFFFF;
 
   &__input {
@@ -489,10 +553,11 @@ table {
     display: flex;
     justify-content: center;
     align-items: center;
-    
+
     & svg {
       pointer-events: none;
     }
+
     &.current {
       width: unset;
       padding: 10px;
