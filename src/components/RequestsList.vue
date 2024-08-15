@@ -166,7 +166,7 @@
             </select>
           </div>
           <div class="pagination d-flex align-items-center">
-            <button data-action="first">
+            <button data-action="first" @click="changePage">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_2038_827" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14" height="14">
                   <rect width="14" height="14" fill="#D9D9D9"/>
@@ -179,7 +179,7 @@
               </svg>
             </button>
 
-            <button data-action="prev">
+            <button data-action="prev" @click="changePage">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_2038_834" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="14" height="14">
                   <rect width="14" height="14" fill="#D9D9D9"/>
@@ -190,20 +190,20 @@
               </svg>
             </button>
 
-            <div v-if="Number(this.paginationData.pages) <= 5">
-              <button v-for="index in 5" :key="index" :data-action="index" @click="changePage(index)">
-                {{ index }}
-              </button>
-            </div>
+<!--            <div v-if="Number(this.paginationData.pages) <= 5" class="d-flex align-items-center">-->
+<!--              <button v-for="index in 5" :key="index" :data-action="getPagesArray() + index" @click="changePage">-->
+<!--                {{ index }}-->
+<!--              </button>-->
+<!--            </div>-->
 
-            <div v-else-if="Number(this.paginationData.page) > 5">
-              <button v-for="index in 5" :key="index" :data-action="index" @click="changePage(getPagesArray() + index)" :class="getCurrentPage(index) ? 'current' : ''">
+            <div class="d-flex align-items-center">
+              <button v-for="index in 5" :key="index" :data-action="getPagesArray() + index" @click="changePage" :class="getCurrentPage(index) ? 'current' : ''">
                 {{ getPagesArray() + index }}
               </button>
             </div>
 
 
-            <button data-action="next">
+            <button data-action="next" @click="changePage">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_2038_869" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
                   <rect width="16" height="16" fill="#D9D9D9"/>
@@ -214,7 +214,7 @@
               </svg>
             </button>
 
-            <button data-action="last">
+            <button data-action="last" @click="changePage">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <mask id="mask0_2038_876" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
                   <rect width="16" height="16" fill="#D9D9D9"/>
@@ -257,7 +257,7 @@ export default {
       paginationBlock: {},
       currentQuery: {
         page_size: '10',
-        page: '12'
+        page: '1'
       },
       loading: true,
       pageSizeSelect: null,
@@ -265,17 +265,46 @@ export default {
   },
   methods: {
     ...mapActions(["sendAppealsRequest"]),
-    changePage(newPage) {
-      console.log(typeof newPage)
-      if (newPage !== this.paginationData.page) {
-        this.currentQuery.page = newPage;
+    
+    changePage(event) {
+      const action = event.target.dataset.action;
+      const curPage = Number(this.currentQuery.page);
+      if (!isNaN(Number(action))) {
+        // пришло число, меняем страницу на конкретную
+        if (this.paginationData.page !== Number(action)) {
+          this.currentQuery.page = action;
+        }
+      } else {
+        // пришло действие
+        switch (action) {
+          case "next":
+            this.currentQuery.page = String(curPage + 1);
+            break;
+          case "prev":
+            if (curPage - 1 !== 0) {
+              this.currentQuery.page = String(curPage - 1);
+            }
+            break;
+          case "first":
+            if (this.paginationData.page !== '1') {
+              this.currentQuery.page = '1';
+            }
+            break;
+          case "last":
+            if (this.paginationData.page !== this.paginationData.pages) {
+              this.currentQuery.page = this.paginationData.pages;
+            }
+            break;
+        }
       }
     },
+    
     getCurrentPage(index) {
       if (Number(this.paginationData.page) === this.getPagesArray() + index ) {
         return true
       } else return false
     },
+    
     getApplicant(appeal) {
       if (appeal.created_by) {
         if (appeal.created_by.first_name && appeal.created_by.last_name) {
@@ -322,13 +351,17 @@ export default {
     
     getPagesArray() {
       const getLastElement = (page) => {
-        while (page % 5 !== 0) {
+        while (page % 5 !== 0 && page < Number(this.paginationData.pages)) {
           page++
         }
         return page;
       }
       const lastEl = getLastElement(Number(this.paginationData.page));
-      return (lastEl - 5) !== 0 ? (lastEl - 5) : 1;
+      if (lastEl === 0 || lastEl - 5 !== 0) {
+        return lastEl - 5
+      } else {
+        return 0
+      }
     }
   },
   watch: {
@@ -448,12 +481,22 @@ table {
     width: 46px;
     height: 32px;
     margin: 0 4px;
+    font-size: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    & svg {
+      pointer-events: none;
+    }
     &.current {
-      width: 32px;
+      width: unset;
+      padding: 10px;
       color: #fff;
       box-shadow: 0 4px 4px 0 rgba(106, 174, 94, 0.25);
       background: #50b053;
       border-radius: 50%;
+      aspect-ratio: 1 / 1;
     }
   }
 }
