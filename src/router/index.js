@@ -1,6 +1,4 @@
 import Vue from 'vue';
-import store from '@/store';
-import {Modal} from 'bootstrap';
 
 const routes = [
     {
@@ -27,22 +25,28 @@ const router = new VueRouter({
     routes
 });
 
-router.beforeEach((to, from, next) => {
-    if (!store.getters.getAuthStatus && to.name !== 'Login') {
-        next({
-            name: 'Login',
-            replace: true
-        })
-    } else {
-        const authModal = Modal.getInstance('#auth-modal');
-        if (authModal) {
-            authModal.hide();
-        }
-        setTimeout(() => {
-            next();
-        }, 1000)
-    }
-})
+// router.afterEach((to, from) => {
+//     if (!store.getters.getAuthStatus) {
+//         router.replace({
+//             name: 'Login',
+//         })
+//     } else {
+//         const authModal = Modal.getInstance('#auth-modal');
+//         if (authModal) {
+//             authModal.hide();
+//         }
+//         setTimeout(() => {
+//             router.replace({
+//                 name: 'Requests',
+//                 query: {
+//                     page: "1",
+//                     page_size: "10",
+//                 }
+//             })
+//         }, 500)
+//     }
+// });
+
 
 Vue.use(VueRouter);
 

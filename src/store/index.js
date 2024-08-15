@@ -39,7 +39,6 @@ export default new Vuex.Store({
                     if (response.status === 200) {
                         return response.json()
                             .then(data => {
-                                console.log(data)
                                 context.commit("setAppealsData", data);
                             })
                     }

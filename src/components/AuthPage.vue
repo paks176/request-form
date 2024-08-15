@@ -65,7 +65,6 @@
 import { Modal } from 'bootstrap';
 import { mapActions } from "vuex";
 import { mapGetters } from "vuex";
-import router from "@/router";
 
 export default {
   name: "AuthPage",
@@ -76,6 +75,7 @@ export default {
       passwordValue: '',
       messageField: null,
       loading: false,
+      authModal: null,
     }
   },
   computed: {
@@ -114,7 +114,10 @@ export default {
             this.messageField.classList.replace('text-danger', 'green-text-2')
             this.messageField.innerText = 'Успешный вход';
             this.loading = false;
-            router.push({ name: 'Requests' });
+            this.authModal.hide();
+            setTimeout(() => {
+              this.$router.push({ name: 'Requests' }).catch(() => {});
+            }, 500)
           } else {
             if (this.messageField) {
               this.messageField.innerText = 'Неверные данные для входа';
@@ -122,19 +125,19 @@ export default {
             }
           }
         })
-      }, 1000)
+      }, 500)
 
     }
   },
   mounted() {
     this.messageField = this.$el.querySelector('#auth-password .modal-inputs__item--message');
     this.passwordField = this.$el.querySelector('#auth-password input');
-    const authModal = Modal.getOrCreateInstance(document.querySelector('#auth-modal'), {
+    this.authModal = Modal.getOrCreateInstance(document.querySelector('#auth-modal'), {
       backdrop: false,
       keyboard: false,
       focus: true,
     });
-    authModal.show();
+    this.authModal.show();
   },
 }
 </script>
