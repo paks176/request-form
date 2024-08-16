@@ -22,7 +22,7 @@
                   v-model="localAppeal.full_address" 
                   :placeholder="!localAppeal.full_address ? 'Не указано' : '' "/>
             </div>
-            <div v-if="getPremisesAutocomplete.length > 0 && this.formInputs.apartmentInput.value !== ''" class="choice position-absolute">
+            <div v-if="getPremisesAutocomplete.length > 0 && formInputs?.apartmentInput?.value !== ''" class="choice position-absolute">
               <div 
                   class="choice-item p-2" 
                   v-for="item in getPremisesAutocomplete" 
@@ -47,12 +47,12 @@
                   v-model="localAppeal.apartment"
                   :placeholder="!localAppeal.apartment ? 'Не указано' : '' "/>
             </div>
-            <div v-if="applyApartmentChoice.length > 0 && this.formInputs.addressInput.value !== ''" class="choice position-absolute">
+            <div v-if="getApartmentAutocomplete.length > 0 && formInputs?.apartmentInput?.value !== ''" class="choice position-absolute">
               <div
                   class="choice-item p-2"
                   v-for="item in getApartmentAutocomplete"
                   :key="item.id"
-                  @click="applyAddressChoice($event.target, item.id)"
+                  @click="applyApartmentChoice($event.target, item.id)"
               >
                 {{ item.number }}
               </div>
@@ -125,8 +125,8 @@
                   data-info="phone" 
                   type="number"
                   @change="onFormChange($event.target)" 
-                  :value="this.localAppeal.applicant.phone" 
-                  >
+                  v-model="this.localAppeal.phone"
+                  :placeholder="this.localAppeal.phone ?? 'Не указано'">
             </div>
           </div>
         </div>
@@ -252,7 +252,6 @@ export default {
   },
   
   mounted() {
-    console.log(this.$el);
     this.formInputs.dueDateInput = this.$el.querySelector('#due_date');
     this.formInputs.addressInput = this.$el.querySelector('#premiseAddress');
     this.formInputs.apartmentInput = this.$el.querySelector('#apartmentInput');

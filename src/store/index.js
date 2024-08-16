@@ -86,7 +86,6 @@ export default new Vuex.Store({
         },
         
         sendApartmentAutocompleteRequest(context, { apartment, premise }) {
-            console.log(apartment, premise)
             if (premise) {
                 axios.get(`https://dev.moydomonline.ru/api/geo/v1.0/apartments/?premise_id=${premise}&search=${apartment}`, 
                     {

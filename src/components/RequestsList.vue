@@ -458,7 +458,6 @@ export default {
     },
     
     prepareDataForModal(data) {
-      console.log(data)
       this.modalProps = {
         modalHeader: {
           number: data?.number,
