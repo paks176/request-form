@@ -11,6 +11,7 @@ export default new Vuex.Store({
         appealsData: {},
         premisesData: {},
         premisesAutocomplete: [],
+        apartmentAutocomplete: [],
     },
     actions: {
         sendAuthRequest(context, body) {
@@ -62,7 +63,6 @@ export default new Vuex.Store({
         },
 
         sendPremisesAutocompleteRequest(context, request) {
-            console.log(request);
             if (request) {
                 axios.get('https://dev.moydomonline.ru/api/geo/v2.0/user-premises/?search=' + request,
                     {
@@ -75,10 +75,33 @@ export default new Vuex.Store({
                             }
                         }
                     })
+                    .catch(error => {
+                        console.log(error);
+                    })
             } else {
                 setTimeout(() => {
                     context.commit("setPremisesAutocomplete", []);
                 }, 1000)
+            }
+        },
+        
+        sendApartmentAutocompleteRequest(context, { apartment, premise }) {
+            console.log(apartment, premise)
+            if (premise) {
+                axios.get(`https://dev.moydomonline.ru/api/geo/v1.0/apartments/?premise_id=${premise}&search=${apartment}`, 
+                    {
+                        headers: {"Authorization": `Basic ${context.state.authData}`},
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            if (response.data?.results.length) {
+                                context.commit("setApartmentAutocomplete", response.data.results);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                    console.log(error);
+                })
             }
         }
     },
@@ -97,6 +120,9 @@ export default new Vuex.Store({
         },
         setPremisesAutocomplete(state, data) {
             state.premisesAutocomplete = data;
+        },
+        setApartmentAutocomplete(state, data) {
+            state.apartmentAutocomplete = data;
         }
     },
     getters: {
@@ -113,8 +139,10 @@ export default new Vuex.Store({
             return state.premisesData;
         },
         getPremisesAutocomplete: state => {
-            console.log(state.premisesAutocomplete)
-            return state.premisesAutocomplete
+            return state.premisesAutocomplete;
+        },
+        getApartmentAutocomplete: state => {
+            return state.apartmentAutocomplete;
         },
     }
 });

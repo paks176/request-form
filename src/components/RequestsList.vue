@@ -468,6 +468,7 @@ export default {
         phone: data.applicant?.phone,
         description: data?.description,
         full_address: data.premise?.full_address,
+        premise_id: data?.premise.id,
         apartment: data.apartment?.number,
         due_date: this.getDate(data?.due_date).split(' ')[0],
       }
@@ -485,7 +486,6 @@ export default {
       },
       deep: true
     }
-
   },
   
   mounted() {

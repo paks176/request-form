@@ -6,7 +6,9 @@
         <div class="modal-header my-2 p-0">
           <h3>Заявка № {{ this.localAppeal.modalHeader.number }} (от {{ this.localAppeal.modalHeader.date }})</h3>
         </div>
+        
         <div class="input-group-1 d-flex mb-6">
+
           <div class="modal-inputs__item position-relative flex-grow-1 pb-2 me-3">
             <div class="modal-inputs__item--message green-text-2 mb-2">
               Дом
@@ -14,23 +16,25 @@
             <div>
               <input 
                   data-info="premise_id" 
-                  type="text" id="premiseAddress"
+                  type="text"
+                  id="premiseAddress"
                   @input="sendPremisesAutocompleteRequest($event.target.value)"
                   v-model="localAppeal.full_address" 
                   :placeholder="!localAppeal.full_address ? 'Не указано' : '' "/>
             </div>
-            <div v-if="getPremisesAutocomplete.length > 0 && this.formInputs.addressInput.value !== ''" class="choice position-absolute">
+            <div v-if="getPremisesAutocomplete.length > 0 && this.formInputs.apartmentInput.value !== ''" class="choice position-absolute">
               <div 
                   class="choice-item p-2" 
                   v-for="item in getPremisesAutocomplete" 
                   :key="item.id"
-                  @click="applyChoice($event.target, item.id)"
+                  @click="applyAddressChoice($event.target, item.id)"
               >
                 {{ item.full_address }}
               </div>
             </div>
           </div>
-          <div class="modal-inputs__item flex-grow-1 pb-2 me-3">
+          
+          <div class="modal-inputs__item position-relative flex-grow-1 pb-2 me-3">
             <div class="modal-inputs__item--message green-text-2 mb-2">
               Квартира
             </div>
@@ -38,12 +42,24 @@
               <input
                   data-info="apartment" 
                   type="text"
-                  @input="onFormChange($event.target)"
-                  id="premiseApartment" 
-                  :value="this.localAppeal.apartment" 
-                  :placeholder="this.localAppeal.apartment ?? 'Не указано' "/>
+                  id="apartmentInput"
+                  @input="sendApartmentAutocompleteRequest({ apartment: $event.target.value, premise: localAppeal.premise_id })"
+                  v-model="localAppeal.apartment"
+                  :placeholder="!localAppeal.apartment ? 'Не указано' : '' "/>
+            </div>
+            <div v-if="applyApartmentChoice.length > 0 && this.formInputs.addressInput.value !== ''" class="choice position-absolute">
+              <div
+                  class="choice-item p-2"
+                  v-for="item in getApartmentAutocomplete"
+                  :key="item.id"
+                  @click="applyAddressChoice($event.target, item.id)"
+              >
+                {{ item.number }}
+              </div>
             </div>
           </div>
+          
+          
           <div class="modal-inputs__item flex-grow-1 pb-2">
             <div class="modal-inputs__item--message green-text-2 mb-2">
               Срок
@@ -59,6 +75,7 @@
             </div>
           </div>
         </div>
+        
         <div class="input-group-2 d-flex mb-6">
           <div class="modal-inputs__item pb-2 me-3">
             <div class="modal-inputs__item--message green-text-2 mb-2">
@@ -106,7 +123,7 @@
             <div>
               <input 
                   data-info="phone" 
-                  type="number" 
+                  type="number"
                   @change="onFormChange($event.target)" 
                   :value="this.localAppeal.applicant.phone" 
                   >
@@ -124,6 +141,7 @@
               @input="onFormChange($event.target)" 
               :placeholder="this.localAppeal.description ?? 'Не указано'"></textarea>
         </div>
+        
         <button class="d-none" id="setDate" @click="setDateFromAppeal">Set date</button>
         
         <div class="d-flex ms-auto">
@@ -148,7 +166,7 @@ export default {
   },
   
   computed: {
-    ...mapGetters(['getPremisesAutocomplete']),
+    ...mapGetters(["getPremisesAutocomplete", "getApartmentAutocomplete"]),
   },
   
   data() {
@@ -159,7 +177,8 @@ export default {
       myDate: new Date('2000-01-01T00:01:01Z'),
       formInputs: {
         dueDateInput: null,
-        addressInput: null, 
+        addressInput: null,
+        apartmentInput: null,
       },
       
       localAppeal: {
@@ -167,21 +186,19 @@ export default {
           number: '',
           date: '',
         },
-        applicant: {},
+        applicant: {
+          first_name: '',
+          last_name: '',
+          patronymic_name: '',
+          username: ''
+        },
         phone: '',
         description: '',
         full_address: '',
         apartment: '',
+        apartment_id: '',
         due_date: '',
-      },
-      
-      changedFormData: {
-        applicant: {},
-        phone: '',
-        description: '',
         premise_id: '',
-        apartment: '',
-        due_date: '',
       },
       
       setDateButton: '',
@@ -201,23 +218,27 @@ export default {
   },
    
   methods: {
-    ...mapActions(["sendPremisesAutocompleteRequest"]),
-    ...mapMutations(["setPremisesAutocomplete"]),
+    ...mapActions(["sendPremisesAutocompleteRequest", "sendApartmentAutocompleteRequest"]),
+    ...mapMutations(["setPremisesAutocomplete", "setApartmentAutocomplete"]),
     onFormChange(target) {
       if (target.dataset.info === 'firstName' || target.dataset.info === 'lastName' || target.dataset.info === 'patronymic') {
-        this.changedFormData.applicant[target.dataset.info] = target.value;
+        this.localAppeal.applicant[target.dataset.info] = target.value;
       } else {
-        this.changedFormData[target.dataset.info] = target.value;
+        this.localAppeal[target.dataset.info] = target.value;
       }
     },
-    applyChoice(target, id) {
-      if (this.formInputs.addressInput) {
-        if (id) {
-          console.log(target.innerText);
-          this.localAppeal.full_address = target.innerText;
-          this.changedFormData.premise_id = id;
-          this.setPremisesAutocomplete([]);
-        }
+    applyAddressChoice(target, id) {
+      if (this.formInputs.addressInput && id) {
+        this.localAppeal.full_address = target.innerText;
+        this.localAppeal.premise_id = id;
+        this.setPremisesAutocomplete([]);
+      }
+    },
+    applyApartmentChoice(target, id) {
+      if (this.formInputs.apartmentInput && id) {
+        this.localAppeal.apartment = target.innerText;
+        this.localAppeal.apartment_id = id;
+        this.setApartmentAutocomplete([]);
       }
     },
     setDateFromAppeal() {
@@ -231,8 +252,10 @@ export default {
   },
   
   mounted() {
+    console.log(this.$el);
     this.formInputs.dueDateInput = this.$el.querySelector('#due_date');
     this.formInputs.addressInput = this.$el.querySelector('#premiseAddress');
+    this.formInputs.apartmentInput = this.$el.querySelector('#apartmentInput');
     this.setDateButton = this.$el.querySelector('#setDate');
     this.appealModal = Modal.getOrCreateInstance(document.querySelector('#appealModal'), {
       backdrop: true,
@@ -244,6 +267,7 @@ export default {
     this.$el.querySelector('#appealModal').addEventListener('hidden.bs.modal', () => {
       this.$emit('clearProps');
       this.setPremisesAutocomplete([]);
+      this.setApartmentAutocomplete([]);
     })
   }
 }
