@@ -467,7 +467,7 @@ export default {
         applicant: this.getApplicant(data),
         phone: data.applicant?.phone,
         description: data?.description,
-        address: data.premise?.address,
+        full_address: data.premise?.full_address,
         apartment: data.apartment?.number,
         due_date: this.getDate(data?.due_date).split(' ')[0],
       }

@@ -10,6 +10,7 @@ export default new Vuex.Store({
         authData: "",
         appealsData: {},
         premisesData: {},
+        premisesAutocomplete: [],
     },
     actions: {
         sendAuthRequest(context, body) {
@@ -28,21 +29,17 @@ export default new Vuex.Store({
                 console.log(error)
             })
         },
-        
+
         sendAppealsRequest(context, params) {
             const queryParams = params ? "?" + (new URLSearchParams(params)).toString() : "";
-            return fetch(
+            return axios.get(
                 `https://dev.moydomonline.ru/api/appeals/v1.0/appeals${queryParams}`,
-                {   
-                    method: "GET",
-                    headers: { "Authorization" : `Basic ${context.state.authData}` },
+                {
+                    headers: {"Authorization": `Basic ${context.state.authData}`},
                 })
                 .then(response => {
                     if (response.status === 200) {
-                        return response.json()
-                            .then(data => {
-                                context.commit("setAppealsData", data);
-                            })
+                        context.commit("setAppealsData", response.data);
                     }
                 }).catch(error => {
                     console.log(error);
@@ -50,23 +47,40 @@ export default new Vuex.Store({
         },
 
         sendPremisesRequest(context) {
-            return fetch(
+            return axios.get(
                 'https://dev.moydomonline.ru/api/geo/v2.0/user-premises/',
                 {
-                    method: "GET",
-                    headers: { "Authorization" : `Basic ${context.state.authData}` },
+                    headers: {"Authorization": `Basic ${context.state.authData}`},
                 })
                 .then(response => {
                     if (response.status === 200) {
-                        return response.json()
-                            .then(data => {
-                                context.commit("setPremises", data);
-                            })
+                        context.commit("setPremises", response.data);
                     }
                 }).catch(error => {
                     console.log(error);
                 })
         },
+
+        sendPremisesAutocompleteRequest(context, request) {
+            console.log(request);
+            if (request) {
+                axios.get('https://dev.moydomonline.ru/api/geo/v2.0/user-premises/?search=' + request,
+                    {
+                        headers: {"Authorization": `Basic ${context.state.authData}`},
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            if (response.data?.results.length) {
+                                context.commit("setPremisesAutocomplete", response.data.results);
+                            }
+                        }
+                    })
+            } else {
+                setTimeout(() => {
+                    context.commit("setPremisesAutocomplete", []);
+                }, 1000)
+            }
+        }
     },
     mutations: {
         setAuthorized(state, authorized) {
@@ -80,6 +94,9 @@ export default new Vuex.Store({
         },
         setPremises(state, data) {
             state.premisesData = data;
+        },
+        setPremisesAutocomplete(state, data) {
+            state.premisesAutocomplete = data;
         }
     },
     getters: {
@@ -94,6 +111,10 @@ export default new Vuex.Store({
         },
         getPremisesData: state => {
             return state.premisesData;
-        }
+        },
+        getPremisesAutocomplete: state => {
+            console.log(state.premisesAutocomplete)
+            return state.premisesAutocomplete
+        },
     }
 });

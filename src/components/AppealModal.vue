@@ -7,12 +7,27 @@
           <h3>Заявка № {{ this.localAppeal.modalHeader.number }} (от {{ this.localAppeal.modalHeader.date }})</h3>
         </div>
         <div class="input-group-1 d-flex mb-6">
-          <div class="modal-inputs__item flex-grow-1 pb-2 me-3">
+          <div class="modal-inputs__item position-relative flex-grow-1 pb-2 me-3">
             <div class="modal-inputs__item--message green-text-2 mb-2">
               Дом
             </div>
             <div>
-              <input type="text" id="premiseAddress" v-model="this.localAppeal.address" :placeholder="this.localAppeal.address ?? 'Не указано' "/>
+              <input 
+                  data-info="premise_id" 
+                  type="text" id="premiseAddress"
+                  @input="sendPremisesAutocompleteRequest($event.target.value)"
+                  v-model="localAppeal.full_address" 
+                  :placeholder="!localAppeal.full_address ? 'Не указано' : '' "/>
+            </div>
+            <div v-if="getPremisesAutocomplete.length > 0 && this.formInputs.addressInput.value !== ''" class="choice position-absolute">
+              <div 
+                  class="choice-item p-2" 
+                  v-for="item in getPremisesAutocomplete" 
+                  :key="item.id"
+                  @click="applyChoice($event.target, item.id)"
+              >
+                {{ item.full_address }}
+              </div>
             </div>
           </div>
           <div class="modal-inputs__item flex-grow-1 pb-2 me-3">
@@ -20,7 +35,13 @@
               Квартира
             </div>
             <div>
-              <input type="text" id="premiseApartment" v-model="this.localAppeal.apartment" :placeholder="this.localAppeal.apartment ?? 'Не указано' "/>
+              <input
+                  data-info="apartment" 
+                  type="text"
+                  @input="onFormChange($event.target)"
+                  id="premiseApartment" 
+                  :value="this.localAppeal.apartment" 
+                  :placeholder="this.localAppeal.apartment ?? 'Не указано' "/>
             </div>
           </div>
           <div class="modal-inputs__item flex-grow-1 pb-2">
@@ -28,7 +49,13 @@
               Срок
             </div>
             <div>
-              <input type="date" id="dueDate" :value ="this.myDate && new Date(myDate.getTime()-(myDate.getTimezoneOffset()*60*1000)).toISOString().split('T')[0]" @input="this.myDate = $event.target.valueAsDate"/>
+              <input
+                  data-info="due_date"
+                  type="date"
+                  @change="onFormChange($event.target)"
+                  id="due_date" 
+                  :value ="this.myDate && new Date(myDate.getTime()-(myDate.getTimezoneOffset()*60*1000)).toISOString().split('T')[0]" 
+                  @input="this.myDate = $event.target.valueAsDate"/>
             </div>
           </div>
         </div>
@@ -38,7 +65,12 @@
               Фамилия
             </div>
             <div>
-              <input type="text" v-model="this.localAppeal.applicant.lastName"  :placeholder="this.localAppeal.lastName ?? 'Не указано'">
+              <input 
+                  data-info="lastName" 
+                  type="text"
+                  @input="onFormChange($event.target)"
+                  :value="this.localAppeal.applicant.lastName" 
+                  :placeholder="this.localAppeal.lastName ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2 me-3">
@@ -46,7 +78,12 @@
               Имя
             </div>
             <div>
-              <input type="text" v-model="this.localAppeal.applicant.firstName" :placeholder="this.localAppeal.firstName ?? 'Не указано'">
+              <input
+                  data-info="firstName" 
+                  type="text" 
+                  @input="onFormChange($event.target)" 
+                  :value="this.localAppeal.applicant.firstName" 
+                  :placeholder="this.localAppeal.firstName ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2 me-3">
@@ -54,7 +91,12 @@
               Отчество
             </div>
             <div>
-              <input type="text" v-model="this.localAppeal.applicant.patronymic" :placeholder="this.localAppeal.patronymic ?? 'Не указано'">
+              <input 
+                  data-info="patronymic" 
+                  type="text" 
+                  @input="onFormChange($event.target)" 
+                  :value="this.localAppeal.applicant.patronymic" 
+                  :placeholder="this.localAppeal.patronymic ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2">
@@ -62,7 +104,12 @@
               Телефон
             </div>
             <div>
-              <input type="number" v-model="this.localAppeal.applicant.phone" :placeholder="this.localAppeal.phone ?? 'Не указано'">
+              <input 
+                  data-info="phone" 
+                  type="number" 
+                  @change="onFormChange($event.target)" 
+                  :value="this.localAppeal.applicant.phone" 
+                  >
             </div>
           </div>
         </div>
@@ -71,10 +118,18 @@
           <div class="modal-inputs__item--message green-text-2 mb-2">
             Описание заявки
           </div>
-          <textarea v-model="this.localAppeal.description" :placeholder="this.localAppeal.description ?? 'Не указано'"></textarea>
+          <textarea 
+              data-info="description" 
+              :value="this.localAppeal.description" 
+              @input="onFormChange($event.target)" 
+              :placeholder="this.localAppeal.description ?? 'Не указано'"></textarea>
         </div>
-        <button class="d-none" id="setDate" @click="setDateFromAppeal">Set date one to today</button>
-        <button class="main-button ms-auto mt-4">Сохранить</button>
+        <button class="d-none" id="setDate" @click="setDateFromAppeal">Set date</button>
+        
+        <div class="d-flex ms-auto">
+          <button class="main-button mt-4 me-4">Сохранить</button>
+          <button class="main-button mt-4" @click="closeModal()">Закрыть</button>
+        </div>
       </div>
     </div>
   </div>
@@ -82,32 +137,53 @@
 </template>
 
 <script>
+import { mapActions, mapGetters, mapMutations } from "vuex";
+
 import { Modal } from 'bootstrap';
 export default {
   name: "AppealModal",
+  
   props: {
     appeal: null,
   },
+  
+  computed: {
+    ...mapGetters(['getPremisesAutocomplete']),
+  },
+  
   data() {
     return {
       appealModal: null,
+      // хотел сделать появление кнопки "сохранить" на изменениях, но хэндлер @input почему-то отменяет ввод первого символа если в нем есть изменение переменной из data(). Не нашел в сети в чем проблема или похожих случаев.
+      //formChanged: false,
       myDate: new Date('2000-01-01T00:01:01Z'),
       formInputs: {
         dueDateInput: null,
         addressInput: null, 
       },
+      
       localAppeal: {
         modalHeader: {
           number: '',
           date: '',
         },
-        applicant: '',
+        applicant: {},
         phone: '',
         description: '',
-        address: '',
+        full_address: '',
         apartment: '',
         due_date: '',
       },
+      
+      changedFormData: {
+        applicant: {},
+        phone: '',
+        description: '',
+        premise_id: '',
+        apartment: '',
+        due_date: '',
+      },
+      
       setDateButton: '',
     }
   },
@@ -116,8 +192,6 @@ export default {
       handler() {
         if (this.$props.appeal) {
           this.$set(this.$data, 'localAppeal', this.$props.appeal);
-          // костыль, vue не поддерживает .valueAsDate почему-то! По хорошему надо встроить библиотеку, но нет времени
-          // из-за костыля в консоли ошибки, но форма работает. При начичии времени можно сделать по-нормальному
           this.setDateButton.click();
           this.appealModal.show();
         }
@@ -125,30 +199,54 @@ export default {
       deep: true,
     }
   },
-  
+   
   methods: {
+    ...mapActions(["sendPremisesAutocompleteRequest"]),
+    ...mapMutations(["setPremisesAutocomplete"]),
+    onFormChange(target) {
+      if (target.dataset.info === 'firstName' || target.dataset.info === 'lastName' || target.dataset.info === 'patronymic') {
+        this.changedFormData.applicant[target.dataset.info] = target.value;
+      } else {
+        this.changedFormData[target.dataset.info] = target.value;
+      }
+    },
+    applyChoice(target, id) {
+      if (this.formInputs.addressInput) {
+        if (id) {
+          console.log(target.innerText);
+          this.localAppeal.full_address = target.innerText;
+          this.changedFormData.premise_id = id;
+          this.setPremisesAutocomplete([]);
+        }
+      }
+    },
     setDateFromAppeal() {
       this.myDate = new Date(this.localAppeal.due_date);
-    }
+    },
+    closeModal() {
+      if (this.appealModal) {
+        this.appealModal.hide();
+      }
+    },
   },
   
   mounted() {
-    this.formInputs.dueDateInput = this.$el.querySelector('#dueDate');
+    this.formInputs.dueDateInput = this.$el.querySelector('#due_date');
     this.formInputs.addressInput = this.$el.querySelector('#premiseAddress');
     this.setDateButton = this.$el.querySelector('#setDate');
     this.appealModal = Modal.getOrCreateInstance(document.querySelector('#appealModal'), {
       backdrop: true,
-      keyboard: false,
+      keyboard: true,
     });
+    
     this.myDate = new Date(this.myDate.setDate(this.myDate.getDate() + 1));
 
     this.$el.querySelector('#appealModal').addEventListener('hidden.bs.modal', () => {
       this.$emit('clearProps');
+      this.setPremisesAutocomplete([]);
     })
   }
 }
-
-
 </script>
 
 <style scoped lang="scss">
@@ -197,7 +295,36 @@ export default {
         & textarea {
           width: 100%;
           border: none;
+          outline: none;
         }
+      }
+    }
+  }
+  .choice {
+    transition: all 0.3s ease;
+    background-color: #FFFFFF;
+    border: 1px solid #CCCCCC;
+    border-radius: 0 0 6px 6px;
+    top: 100%;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: scroll;
+      &::-webkit-scrollbar {
+        width: 12px;
+        background-clip: padding-box;
+      }
+      &::-webkit-scrollbar-track {
+        background-color: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background-color: #D6D6DF;
+        border-radius: 20px;
+        border: 3px solid #fff;
+      }
+    &-item {
+      cursor: pointer;
+      &:hover {
+        background-color: #CCCCCC;
       }
     }
   }
