@@ -151,7 +151,7 @@
               </td>
               <td>{{ appeal?.created_at ? getDate(appeal.created_at) : 'Данные отсутствуют' }}</td>
               <td>{{ appeal.premise?.address ? appeal.premise.address : 'Данные отсутствуют' }}</td>
-              <td>{{ getApplicant(appeal) }}</td>
+              <td>{{ getApplicant(appeal)?.firstName && getApplicant(appeal)?.lastName ? getApplicant(appeal)?.firstName + ' ' + getApplicant(appeal)?.lastName : getApplicant(appeal)?.userName }}</td>
               <td>
                 <p>{{ appeal?.description ? appeal.description : 'Данные отсутствуют' }}</p>
               </td>
@@ -233,7 +233,7 @@
         </div>
       </div>
     </div>
-    <AppealModal :appealProps="this.modalProps" @clearProps="clearModalProps"/>
+    <AppealModal :appeal="this.modalProps" @clearProps="clearModalProps"/>
   </div>
 </template>
 
@@ -363,16 +363,33 @@ export default {
     },
 
     getApplicant(appeal) {
+      let result = {
+        firstName: '',
+        lastName: '',
+        userName: '',
+        patronymic: '',
+      };
+      
       if (appeal.created_by) {
         if (appeal.created_by.first_name && appeal.created_by.last_name) {
+          
           const getName = (name) => {
             if (name && name.startsWith('user_')) {
               return name.split('_')[1];
             } else return name;
           }
-          return getName(appeal.created_by.first_name) + " " + getName(appeal.created_by.last_name);
-        } else return appeal.created_by.username;
-      } else return 'Данные отсутствуют';
+          
+          result.firstName = getName(appeal.created_by.first_name);
+          result.lastName = getName(appeal.created_by.last_name);
+          
+          if (appeal.created_by.patronymic_name) {
+            result.patronymic = getName(appeal.created_by.patronymic_name);
+          }
+          
+        } else result.userName = appeal.created_by.username;
+      } else result.userName = 'Данные отсутствуют';
+      
+      return result;
     },
 
     getDate(date) {
@@ -435,8 +452,24 @@ export default {
       if (id) {
         const thisAppeal = this.appealsData.results.find((appeal) => appeal.id === id);
         if (thisAppeal) {
-            this.modalProps = thisAppeal;
+            this.prepareDataForModal(thisAppeal)
         }
+      }
+    },
+    
+    prepareDataForModal(data) {
+      console.log(data)
+      this.modalProps = {
+        modalHeader: {
+          number: data?.number,
+          date: this.getDate(data?.created_at).split(' ')[0],
+        },
+        applicant: this.getApplicant(data),
+        phone: data.applicant?.phone,
+        description: data?.description,
+        address: data.premise?.address,
+        apartment: data.apartment?.number,
+        due_date: this.getDate(data?.due_date).split(' ')[0],
       }
     },
 

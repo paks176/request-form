@@ -4,7 +4,7 @@
     <div class="modal-dialog">
       <div class="modal-content p-6">
         <div class="modal-header my-2 p-0">
-          <h3>Заявка № {{ this.appealHeader.number }} от {{ this.appealHeader.date }}</h3>
+          <h3>Заявка № {{ this.localAppeal.modalHeader.number }} (от {{ this.localAppeal.modalHeader.date }})</h3>
         </div>
         <div class="input-group-1 d-flex mb-6">
           <div class="modal-inputs__item flex-grow-1 pb-2 me-3">
@@ -12,10 +12,7 @@
               Дом
             </div>
             <div>
-              <select name="" id="premise">
-                <option selected>1</option>
-                <option>2</option>
-              </select>
+              <input type="text" id="premiseAddress" v-model="this.localAppeal.address" :placeholder="this.localAppeal.address ?? 'Не указано' "/>
             </div>
           </div>
           <div class="modal-inputs__item flex-grow-1 pb-2 me-3">
@@ -23,10 +20,7 @@
               Квартира
             </div>
             <div>
-              <select name="" id="premise">
-                <option selected>1</option>
-                <option>2</option>
-              </select>
+              <input type="text" id="premiseApartment" v-model="this.localAppeal.apartment" :placeholder="this.localAppeal.apartment ?? 'Не указано' "/>
             </div>
           </div>
           <div class="modal-inputs__item flex-grow-1 pb-2">
@@ -34,7 +28,7 @@
               Срок
             </div>
             <div>
-              <input type="date" id="due_date" v-model="formData.due_date">
+              <input type="date" id="dueDate" :value ="this.myDate && new Date(myDate.getTime()-(myDate.getTimezoneOffset()*60*1000)).toISOString().split('T')[0]" @input="this.myDate = $event.target.valueAsDate"/>
             </div>
           </div>
         </div>
@@ -44,7 +38,7 @@
               Фамилия
             </div>
             <div>
-              <input type="text">
+              <input type="text" v-model="this.localAppeal.applicant.lastName"  :placeholder="this.localAppeal.lastName ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2 me-3">
@@ -52,7 +46,7 @@
               Имя
             </div>
             <div>
-              <input type="text">
+              <input type="text" v-model="this.localAppeal.applicant.firstName" :placeholder="this.localAppeal.firstName ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2 me-3">
@@ -60,7 +54,7 @@
               Отчество
             </div>
             <div>
-              <input type="text">
+              <input type="text" v-model="this.localAppeal.applicant.patronymic" :placeholder="this.localAppeal.patronymic ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2">
@@ -68,7 +62,7 @@
               Телефон
             </div>
             <div>
-              <input type="number">
+              <input type="number" v-model="this.localAppeal.applicant.phone" :placeholder="this.localAppeal.phone ?? 'Не указано'">
             </div>
           </div>
         </div>
@@ -77,8 +71,9 @@
           <div class="modal-inputs__item--message green-text-2 mb-2">
             Описание заявки
           </div>
-          <textarea></textarea>
+          <textarea v-model="this.localAppeal.description" :placeholder="this.localAppeal.description ?? 'Не указано'"></textarea>
         </div>
+        <button class="d-none" id="setDate" @click="setDateFromAppeal">Set date one to today</button>
         <button class="main-button ms-auto mt-4">Сохранить</button>
       </div>
     </div>
@@ -91,26 +86,39 @@ import { Modal } from 'bootstrap';
 export default {
   name: "AppealModal",
   props: {
-    appealProps: null,
+    appeal: null,
   },
   data() {
     return {
       appealModal: null,
-      appealHeader: {
-        number: '',
-        date: ''
+      myDate: new Date('2000-01-01T00:01:01Z'),
+      formInputs: {
+        dueDateInput: null,
+        addressInput: null, 
       },
-      formData: {
+      localAppeal: {
+        modalHeader: {
+          number: '',
+          date: '',
+        },
+        applicant: '',
+        phone: '',
+        description: '',
+        address: '',
+        apartment: '',
         due_date: '',
-        applicant: ''
-      }
+      },
+      setDateButton: '',
     }
   },
   watch: {
     $props: {
       handler() {
-        if (this.$props.appealProps) {
-          this.applyFormInfo(this.$props.appealProps);
+        if (this.$props.appeal) {
+          this.$set(this.$data, 'localAppeal', this.$props.appeal);
+          // костыль, vue не поддерживает .valueAsDate почему-то! По хорошему надо встроить библиотеку, но нет времени
+          // из-за костыля в консоли ошибки, но форма работает. При начичии времени можно сделать по-нормальному
+          this.setDateButton.click();
           this.appealModal.show();
         }
       },
@@ -119,16 +127,20 @@ export default {
   },
   
   methods: {
-    applyFormInfo(data) {
-      console.log(data)
+    setDateFromAppeal() {
+      this.myDate = new Date(this.localAppeal.due_date);
     }
   },
   
   mounted() {
+    this.formInputs.dueDateInput = this.$el.querySelector('#dueDate');
+    this.formInputs.addressInput = this.$el.querySelector('#premiseAddress');
+    this.setDateButton = this.$el.querySelector('#setDate');
     this.appealModal = Modal.getOrCreateInstance(document.querySelector('#appealModal'), {
       backdrop: true,
       keyboard: false,
     });
+    this.myDate = new Date(this.myDate.setDate(this.myDate.getDate() + 1));
 
     this.$el.querySelector('#appealModal').addEventListener('hidden.bs.modal', () => {
       this.$emit('clearProps');
