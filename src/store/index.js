@@ -8,6 +8,7 @@ export default new Vuex.Store({
     state: {
         authorized: false,
         authData: "",
+        errorsStack: [],
         appealsData: {},
         premisesData: {},
         premisesAutocomplete: [],
@@ -22,12 +23,20 @@ export default new Vuex.Store({
                     headers: {"Content-Type": "multipart/form-data"}
                 }).then(response => {
                 if (response.status === 200) {
+                    context.commit("pushNewToast", {
+                        type: 'succeed',
+                        header: 'Успешный вход',
+                    })
                     context.commit("setAuthorized", true);
                     context.commit("encodeAuthData", `${body.username}:${body.password}`);
                 }
             }).catch(error => {
                 context.commit("setAuthorized", false);
-                console.log(error)
+                context.commit("pushNewToast", {
+                    type: 'critical',
+                    header: 'Неудачная авторизация',
+                    text: String(error)
+                })
             })
         },
 
@@ -135,6 +144,10 @@ export default new Vuex.Store({
         }
     },
     mutations: {
+        pushNewToast(state, toast) {
+            state.errorsStack.unshift(toast)
+        },
+        
         setAuthorized(state, authorized) {
             state.authorized = authorized;
         },
@@ -172,6 +185,9 @@ export default new Vuex.Store({
         },
         getApartmentAutocomplete: state => {
             return state.apartmentAutocomplete;
+        },
+        getErrorsStack(state) {
+            return state.errorsStack;
         },
     }
 });

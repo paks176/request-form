@@ -10,11 +10,13 @@ import store from '@/store';
 import router from '@/router/index';
 
 // plugins
+import Toast from '@/plugins/toasts';
 import BytesToBase64 from '@/plugins/bytesToBase64';
 import Base64ToBytes from '@/plugins/base64ToBytes';
 
 Vue.use(BytesToBase64);
 Vue.use(Base64ToBytes);
+Vue.use(Toast);
 
 new Vue({
   store,
