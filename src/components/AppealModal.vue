@@ -4,7 +4,10 @@
     <div class="modal-dialog">
       <div class="modal-content p-6">
         <div class="modal-header my-2 p-0 d-flex justify-content-between">
-          <h3>Заявка № {{ localAppeal.modalHeader.number }} (от {{ localAppeal.modalHeader.date }})</h3>
+          <div v-if="localAppeal.modalHeader.number && localAppeal.modalHeader.date">
+            <h3>Заявка № {{ localAppeal.modalHeader.number }} (от {{ localAppeal.modalHeader.date }})</h3>
+          </div>
+          <b v-else>Создание заявки</b>
           <b v-if="localAppeal.modalHeader.status">Статус: {{ localAppeal.modalHeader.status }}</b>
           <b v-if="!localAppeal.modalHeader.number">Новая</b>
         </div>
@@ -152,7 +155,7 @@
         </div>
 
         <div v-if="modalLoading" class="position-absolute loader border-radius-8 ease-animation">
-          <div v-if="success" class="border-radius-8 bg-white p-4">
+          <div v-if="success" class="border-radius-8 bg-white p-4 box-shadow">
             <h4 class="green-text-1">Успешно</h4>
           </div>
           <div v-else>
@@ -236,7 +239,7 @@ export default {
     ...mapActions([
       "sendPremisesAutocompleteRequest",
       "sendApartmentAutocompleteRequest",
-      "changeAppeal"
+      "changeOrCreateAppeal"
     ]),
     ...mapMutations(["setPremisesAutocomplete", "setApartmentAutocomplete"]),
     onFormChange(target) {
@@ -261,7 +264,12 @@ export default {
       }
     },
     setDateFromAppeal() {
-      this.myDate = new Date(this.localAppeal.due_date);
+      if (!this.localAppeal.due_date) {
+        this.myDate = new Date(Date.now());
+        this.localAppeal.due_date = new Date(Date.now()).toISOString();
+      } else {
+        this.myDate = new Date(this.localAppeal.due_date);
+      }
     },
     closeModal() {
       if (this.appealModal) {
@@ -270,14 +278,19 @@ export default {
     },
     handleAppealChange(appeal) {
       this.modalLoading = true;
-      this.changeAppeal(appeal)
+      
+      if (appeal.due_date) {
+        appeal.due_date = new Date(appeal.due_date).toISOString();
+      }
+      
+      this.changeOrCreateAppeal(appeal)
           .then(response => {
             this.success = true;
             setTimeout(() => {
               this.closeModal();
               this.success = false;
               this.modalLoading = false;
-              this.$emit('showEditedAppeal', response.number)
+              this.$emit('showEditedAppeal', response)
             }, 1000)
           })
     }
@@ -364,7 +377,7 @@ export default {
     top: 100%;
     width: 100%;
     max-height: 300px;
-    overflow-y: scroll;
+    overflow-y: auto;
       &::-webkit-scrollbar {
         width: 12px;
         background-clip: padding-box;

@@ -104,9 +104,7 @@ export default new Vuex.Store({
             }
         },
         
-        changeAppeal(context, body) {
-            body.due_date = new Date(body.due_date).toISOString();
-            
+        changeOrCreateAppeal(context, body) {
             if (body.appeal_id) {
                 return axios.patch(`https://dev.moydomonline.ru/api/appeals/v1.0/appeals/${body.appeal_id}/`, body,
                     {
@@ -120,6 +118,19 @@ export default new Vuex.Store({
                     .catch(error => {
                     console.log(error);
                 })
+            } else {
+                return axios.post('https://dev.moydomonline.ru/api/appeals/v1.0/appeals/', body,
+                    {
+                        headers: {"Authorization": `Basic ${context.state.authData}`}
+                    })
+                    .then(response => {
+                        if (response.status === 200) {
+                            return response.data;
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
             }
         }
     },

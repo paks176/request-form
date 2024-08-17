@@ -10,7 +10,7 @@
           </div>
         </div>
 
-        <button class="main-button ms-auto mb-5">СОЗДАТЬ</button>
+        <button class="main-button ms-auto mb-5" @click="showAppeal">СОЗДАТЬ</button>
         <div class="d-flex mb-6">
           <div class="request-table__input d-flex pb-3 me-3">
             <input class="w-100" type="text" placeholder="Поиск (№ заявки, название)" id="searchAppealInput" @input="searchAppealOnInput">
@@ -285,13 +285,13 @@ export default {
   methods: {
     ...mapActions(["sendAppealsRequest", "sendPremisesRequest"]),
 
-    filterByEditedAppeal(number) {
-      if (number) {
-        this.currentQuery.page = 1;
-        this.currentQuery.premise_id = '';
-        this.currentQuery.search = number;
-        this.searchAppealInput.value = number;
+    filterByEditedAppeal(response) {
+      if (response && response.number) {
+        this.currentQuery.search = response.number;
+        this.searchAppealInput.value = response.number;
       }
+      this.currentQuery.page = 1;
+      this.currentQuery.premise_id = '';
     },
 
     searchAppealOnInput() {
@@ -452,30 +452,58 @@ export default {
     },
 
     showAppeal(id) {
+      let thisAppeal;
       if (id) {
-        const thisAppeal = this.appealsData.results.find((appeal) => appeal.id === id);
-        if (thisAppeal) {
-            this.prepareDataForModal(thisAppeal)
-        }
+        thisAppeal = this.appealsData.results.find((appeal) => appeal.id === id);
       }
+      this.prepareDataForModal(thisAppeal)
     },
     
     prepareDataForModal(data) {
-      this.modalProps = {
-        appeal_id: data.id,
-        modalHeader: {
-          number: data?.number,
-          date: this.getDate(data?.created_at).split(' ')[0],
-          status: data.status.name,
-        },
-        applicant: this.getApplicant(data),
-        phone: data.applicant?.phone,
-        description: data?.description,
-        full_address: data.premise?.full_address,
-        premise_id: data?.premise?.id,
-        apartment: data.apartment?.number,
-        due_date: this.getDate(data?.due_date).split(' ')[0],
+      console.log(data)
+      if (data?.id) {
+        // если редактируем
+        this.modalProps = {
+          appeal_id: data.id,
+          modalHeader: {
+            number: data?.number,
+            date: this.getDate(data?.created_at).split(' ')[0],
+            status: data.status.name,
+          },
+          applicant: this.getApplicant(data),
+          phone: data.applicant?.phone,
+          description: data?.description,
+          full_address: data.premise?.full_address,
+          premise_id: data?.premise?.id,
+          apartment: data.apartment?.number,
+          due_date: this.getDate(data?.due_date).split(' ')[0],
+          status: data.status,
+        };
+      } else {
+        // если новая
+        this.modalProps = {
+          appeal_id: '',
+          modalHeader: {
+            number: '',
+            date: '',
+          },
+          applicant: {
+            first_name: '',
+            last_name: '',
+            patronymic_name: '',
+            username: ''
+          },
+          phone: '',
+          description: '',
+          full_address: '',
+          apartment: '',
+          apartment_id: '',
+          due_date: '',
+          premise_id: '',
+          status_id: 1,
+        };
       }
+      
     },
 
     clearModalProps() {
