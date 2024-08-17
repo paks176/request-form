@@ -46,7 +46,7 @@
           <table class="w-100 mb-6">
             <tr>
               <th class="cursor-pointer">
-                <label for="number">
+                <label for="number" @click="sortBy('number')">
                   <input type="checkbox" id="number" class="d-none">
                   №
                   <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -60,7 +60,7 @@
                 </label>
               </th>
               <th class="cursor-pointer">
-                <label for="created_at">
+                <label for="created_at" data-sort="created" @click="sortBy('created')">
                   <input type="checkbox" id="created_at" class="d-none">
                   Создана
                   <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -74,8 +74,8 @@
                 </label>
               </th>
               <th class="cursor-pointer">
-                <label for="apartment">
-                  <input type="checkbox" id="apartment" class="d-none">
+                <label for="address" @click="sortBy('address')">
+                  <input type="checkbox" id="address" class="d-none">
                   Адрес
                   <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
@@ -88,7 +88,7 @@
                 </label>
               </th>
               <th class="cursor-pointer">
-                <label for="applicant">
+                <label for="applicant" @click="sortBy('applicant')">
                   <input type="checkbox" id="applicant" class="d-none">
                   Заявитель
                   <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -102,7 +102,7 @@
                 </label>
               </th>
               <th class="cursor-pointer">
-                <label for="description">
+                <label for="description" @click="sortBy('description')">
                   <input type="checkbox" id="description" class="d-none">
                   Описание
                   <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -117,7 +117,7 @@
               </th>
               <th class="cursor-pointer">
                 <label for="due_date">
-                  <input type="checkbox" id="due_date" class="d-none">
+                  <input type="checkbox" id="due_date" class="d-none" @click="sortBy('due_date')">
                   Срок
                   <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
@@ -131,7 +131,7 @@
               </th>
               <th class="cursor-pointer">
                 <label for="status">
-                  <input type="checkbox" id="status" class="d-none">
+                  <input type="checkbox" id="status" class="d-none" @click="sortBy('status')">
                   Статус
                   <svg class="ms-1 flex-shrink-0" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <mask id="mask0_2026_108" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="16" height="16">
@@ -238,7 +238,7 @@
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
+import {mapActions, mapGetters, mapMutations} from "vuex";
 import AppealModal from "@/components/AppealModal.vue";
 
 export default {
@@ -284,6 +284,8 @@ export default {
   
   methods: {
     ...mapActions(["sendAppealsRequest", "sendPremisesRequest"]),
+    
+    ...mapMutations(["sortBy", "pushNewToast"]),
 
     filterByEditedAppeal(response) {
       if (response && response.number) {
@@ -397,7 +399,17 @@ export default {
 
     getDate(date) {
       if (date) {
-        return new Date(date).toISOString().slice(0, 16).replace('T', ' ').replaceAll('-', '.');
+        const objData = new Date(date);
+        const makeTwoDigits = (value) => {
+          if (String(value).length === 1) {
+              return '0' + value; 
+          } else return value;
+        }
+        return makeTwoDigits(objData.getDate()) + '.'
+            + makeTwoDigits(objData.getMonth())
+            + '.' + objData.getFullYear()
+            + ' ' + makeTwoDigits(objData.getHours())
+            + ':' + makeTwoDigits(objData.getMinutes());
       }
     },
 
@@ -460,7 +472,6 @@ export default {
     },
     
     prepareDataForModal(data) {
-      console.log(data)
       if (data?.id) {
         // если редактируем
         this.modalProps = {
@@ -476,7 +487,7 @@ export default {
           full_address: data.premise?.full_address,
           premise_id: data?.premise?.id,
           apartment: data.apartment?.number,
-          due_date: this.getDate(data?.due_date).split(' ')[0],
+          due_date: data?.due_date,
           status: data.status,
         };
       } else {
@@ -529,6 +540,11 @@ export default {
         this.$set(this.premisesData, 'results', this.getPremisesData?.results);
       })
       this.updateTable();
+      this.pushNewToast({
+        type: 'warning',
+        header: 'Работает простая сортировка по столбцам по возрастанию по клику',
+        text: 'Работает в пределах одной страницы. Чтобы было и на убывание требуется больше времени, опыт создания таких таблиц с сортировкой есть.'
+      })
     } else {
       this.$router.push({name: 'Login'});
     }

@@ -334,7 +334,7 @@ export default {
       }
     }
     &-dialog {
-      margin-top: 20%;
+      margin-top: 15%;
       max-width: unset !important;
       width: 740px;
     }

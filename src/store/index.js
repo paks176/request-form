@@ -52,7 +52,11 @@ export default new Vuex.Store({
                         context.commit("setAppealsData", response.data);
                     }
                 }).catch(error => {
-                    console.log(error);
+                    context.commit("pushNewToast", {
+                        type: 'critical',
+                        header: 'Ошибка получения заявок',
+                        text: String(error)
+                    })
                 })
         },
 
@@ -67,7 +71,11 @@ export default new Vuex.Store({
                         context.commit("setPremises", response.data);
                     }
                 }).catch(error => {
-                    console.log(error);
+                    context.commit("pushNewToast", {
+                        type: 'critical',
+                        header: 'Неудачная попытка запроса адресам',
+                        text: String(error)
+                    })
                 })
         },
 
@@ -85,7 +93,11 @@ export default new Vuex.Store({
                         }
                     })
                     .catch(error => {
-                        console.log(error);
+                        context.commit("pushNewToast", {
+                            type: 'critical',
+                            header: 'Неудачная попытка вывода подсказок (квартиры)',
+                            text: String(error)
+                        })
                     })
             } else {
                 setTimeout(() => {
@@ -93,10 +105,10 @@ export default new Vuex.Store({
                 }, 1000)
             }
         },
-        
-        sendApartmentAutocompleteRequest(context, { apartment, premise }) {
+
+        sendApartmentAutocompleteRequest(context, {apartment, premise}) {
             if (premise) {
-                axios.get(`https://dev.moydomonline.ru/api/geo/v1.0/apartments/?premise_id=${premise}&search=${apartment}`, 
+                axios.get(`https://dev.moydomonline.ru/api/geo/v1.0/apartments/?premise_id=${premise}&search=${apartment}`,
                     {
                         headers: {"Authorization": `Basic ${context.state.authData}`},
                     })
@@ -108,11 +120,11 @@ export default new Vuex.Store({
                         }
                     })
                     .catch(error => {
-                    console.log(error);
-                })
+                        console.log(error);
+                    })
             }
         },
-        
+
         changeOrCreateAppeal(context, body) {
             if (body.appeal_id) {
                 return axios.patch(`https://dev.moydomonline.ru/api/appeals/v1.0/appeals/${body.appeal_id}/`, body,
@@ -125,8 +137,12 @@ export default new Vuex.Store({
                         }
                     })
                     .catch(error => {
-                    console.log(error);
-                })
+                        context.commit("pushNewToast", {
+                            type: 'critical',
+                            header: 'Неудачная попытка изменить заявку',
+                            text: String(error)
+                        })
+                    })
             } else {
                 return axios.post('https://dev.moydomonline.ru/api/appeals/v1.0/appeals/', body,
                     {
@@ -138,7 +154,11 @@ export default new Vuex.Store({
                         }
                     })
                     .catch(error => {
-                        console.log(error);
+                        context.commit("pushNewToast", {
+                            type: 'critical',
+                            header: 'Неудачная попытка создать заявку',
+                            text: String(error)
+                        })
                     })
             }
         }
@@ -147,7 +167,7 @@ export default new Vuex.Store({
         pushNewToast(state, toast) {
             state.errorsStack.unshift(toast)
         },
-        
+
         setAuthorized(state, authorized) {
             state.authorized = authorized;
         },
@@ -165,7 +185,45 @@ export default new Vuex.Store({
         },
         setApartmentAutocomplete(state, data) {
             state.apartmentAutocomplete = data;
-        }
+        },
+        sortBy(state, column) {
+            state.appealsData.results.sort(function (a, b) {
+                switch (column) {
+                    case 'number':
+                        return Number(a.number) - Number(b.number);
+                    case 'created':
+                        return Date.parse(a.created_at) - Date.parse(b.created_at);
+                    case 'address':
+                        if (a.premise?.address < b.premise?.address) {
+                            return -1;
+                        }
+                        if (a.premise?.address > b.premise?.address) {
+                            return 1;
+                        }
+                        return 0;
+                    case 'applicant':
+                        return a.applicant.username - b.applicant.username;
+                    case 'description':
+                        if (a.description < b.description) {
+                            return -1;
+                        }
+                        if (a.description > b.description) {
+                            return 1;
+                        }
+                        return 0;
+                    case 'due_date':
+                        return Date.parse(a.due_date) - Date.parse(b.due_date);
+                    case 'status':
+                        if (a.status.name < b.status.name) {
+                            return -1;
+                        }
+                        if (a.status.name > b.status.name) {
+                            return 1;
+                        }
+                        return 0;
+                }
+            })
+        },
     },
     getters: {
         getAuthStatus: state => {
