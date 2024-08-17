@@ -263,8 +263,7 @@ export default {
         search: '',
       },
       appealsData: {
-        results: [
-        ],
+        results: [],
       },
       paginationData: {
         page: '',
@@ -369,25 +368,20 @@ export default {
         userName: '',
         patronymic: '',
       };
+
+      const getName = (name) => {
+        if (name && name.startsWith('user_')) {
+          return name.split('_')[1];
+        } else return name;
+      }
       
-      if (appeal.created_by) {
-        if (appeal.created_by.first_name && appeal.created_by.last_name) {
-          
-          const getName = (name) => {
-            if (name && name.startsWith('user_')) {
-              return name.split('_')[1];
-            } else return name;
-          }
-          
-          result.firstName = getName(appeal.created_by.first_name);
-          result.lastName = getName(appeal.created_by.last_name);
-          
-          if (appeal.created_by.patronymic_name) {
-            result.patronymic = getName(appeal.created_by.patronymic_name);
-          }
-          
-        } else result.userName = appeal.created_by.username;
-      } else result.userName = 'Данные отсутствуют';
+      appeal.created_by.first_name ? result.firstName = getName(appeal.created_by.first_name) : result.firstName = null;
+
+      appeal.created_by.last_name ? result.lastName = getName(appeal.created_by.last_name) : result.lastName = null;
+
+      appeal.created_by.patronymic? result.patronymic = getName(appeal.created_by.patronymic) : result.patronymic = null;
+
+      appeal.created_by.username ? result.userName = appeal.created_by.username : result.userName = null;
       
       return result;
     },
@@ -424,7 +418,7 @@ export default {
           });
           setTimeout(() => {
             this.loading = false;
-          }, 1000)
+          }, 500)
         }
       });
     },
@@ -452,6 +446,7 @@ export default {
       if (id) {
         const thisAppeal = this.appealsData.results.find((appeal) => appeal.id === id);
         if (thisAppeal) {
+            console.log(thisAppeal)
             this.prepareDataForModal(thisAppeal)
         }
       }
@@ -459,6 +454,7 @@ export default {
     
     prepareDataForModal(data) {
       this.modalProps = {
+        appeal_id: data.id,
         modalHeader: {
           number: data?.number,
           date: this.getDate(data?.created_at).split(' ')[0],
@@ -467,7 +463,7 @@ export default {
         phone: data.applicant?.phone,
         description: data?.description,
         full_address: data.premise?.full_address,
-        premise_id: data?.premise.id,
+        premise_id: data?.premise?.id,
         apartment: data.apartment?.number,
         due_date: this.getDate(data?.due_date).split(' ')[0],
       }

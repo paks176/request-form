@@ -4,7 +4,7 @@
     <div class="modal-dialog">
       <div class="modal-content p-6">
         <div class="modal-header my-2 p-0">
-          <h3>Заявка № {{ this.localAppeal.modalHeader.number }} (от {{ this.localAppeal.modalHeader.date }})</h3>
+          <h3>Заявка № {{ localAppeal.modalHeader.number }} (от {{ localAppeal.modalHeader.date }})</h3>
         </div>
         
         <div class="input-group-1 d-flex mb-6">
@@ -70,8 +70,8 @@
                   type="date"
                   @change="onFormChange($event.target)"
                   id="due_date" 
-                  :value ="this.myDate && new Date(myDate.getTime()-(myDate.getTimezoneOffset()*60*1000)).toISOString().split('T')[0]" 
-                  @input="this.myDate = $event.target.valueAsDate"/>
+                  :value ="myDate && new Date(myDate.getTime()-(myDate.getTimezoneOffset()*60*1000)).toISOString().split('T')[0]" 
+                  @input="myDate = $event.target.valueAsDate"/>
             </div>
           </div>
         </div>
@@ -86,8 +86,8 @@
                   data-info="lastName" 
                   type="text"
                   @input="onFormChange($event.target)"
-                  :value="this.localAppeal.applicant.lastName" 
-                  :placeholder="this.localAppeal.lastName ?? 'Не указано'">
+                  :value="localAppeal.applicant.lastName" 
+                  :placeholder="localAppeal.lastName ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2 me-3">
@@ -99,8 +99,8 @@
                   data-info="firstName" 
                   type="text" 
                   @input="onFormChange($event.target)" 
-                  :value="this.localAppeal.applicant.firstName" 
-                  :placeholder="this.localAppeal.firstName ?? 'Не указано'">
+                  :value="localAppeal.applicant.firstName" 
+                  :placeholder="localAppeal.firstName ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2 me-3">
@@ -112,8 +112,8 @@
                   data-info="patronymic" 
                   type="text" 
                   @input="onFormChange($event.target)" 
-                  :value="this.localAppeal.applicant.patronymic" 
-                  :placeholder="this.localAppeal.patronymic ?? 'Не указано'">
+                  :value="localAppeal.applicant.patronymic" 
+                  :placeholder="localAppeal.patronymic ?? 'Не указано'">
             </div>
           </div>
           <div class="modal-inputs__item pb-2">
@@ -125,8 +125,8 @@
                   data-info="phone" 
                   type="number"
                   @change="onFormChange($event.target)" 
-                  v-model="this.localAppeal.phone"
-                  :placeholder="this.localAppeal.phone ?? 'Не указано'">
+                  v-model="localAppeal.phone"
+                  :placeholder="localAppeal.phone ?? 'Не указано'">
             </div>
           </div>
         </div>
@@ -137,15 +137,15 @@
           </div>
           <textarea 
               data-info="description" 
-              :value="this.localAppeal.description" 
+              :value="localAppeal.description" 
               @input="onFormChange($event.target)" 
-              :placeholder="this.localAppeal.description ?? 'Не указано'"></textarea>
+              :placeholder="localAppeal.description ?? 'Не указано'"></textarea>
         </div>
         
         <button class="d-none" id="setDate" @click="setDateFromAppeal">Set date</button>
         
         <div class="d-flex ms-auto">
-          <button class="main-button mt-4 me-4">Сохранить</button>
+          <button class="main-button mt-4 me-4" @click="changeAppeal(localAppeal)">Сохранить</button>
           <button class="main-button mt-4" @click="closeModal()">Закрыть</button>
         </div>
       </div>
@@ -175,6 +175,7 @@ export default {
       // хотел сделать появление кнопки "сохранить" на изменениях, но хэндлер @input почему-то отменяет ввод первого символа если в нем есть изменение переменной из data(). Не нашел в сети в чем проблема или похожих случаев.
       //formChanged: false,
       myDate: new Date('2000-01-01T00:01:01Z'),
+      
       formInputs: {
         dueDateInput: null,
         addressInput: null,
@@ -182,6 +183,7 @@ export default {
       },
       
       localAppeal: {
+        appeal_id: '',
         modalHeader: {
           number: '',
           date: '',
@@ -211,6 +213,7 @@ export default {
           this.$set(this.$data, 'localAppeal', this.$props.appeal);
           this.setDateButton.click();
           this.appealModal.show();
+          console.log(this.localAppeal)
         }
       },
       deep: true,
@@ -218,7 +221,11 @@ export default {
   },
    
   methods: {
-    ...mapActions(["sendPremisesAutocompleteRequest", "sendApartmentAutocompleteRequest"]),
+    ...mapActions([
+      "sendPremisesAutocompleteRequest",
+      "sendApartmentAutocompleteRequest",
+      "changeAppeal"
+    ]),
     ...mapMutations(["setPremisesAutocomplete", "setApartmentAutocomplete"]),
     onFormChange(target) {
       if (target.dataset.info === 'firstName' || target.dataset.info === 'lastName' || target.dataset.info === 'patronymic') {
