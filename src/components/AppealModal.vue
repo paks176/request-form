@@ -3,8 +3,10 @@
   <div class="modal fade" id="appealModal" tabindex="-1" role="dialog" aria-labelledby="auth-modalLabel">
     <div class="modal-dialog">
       <div class="modal-content p-6">
-        <div class="modal-header my-2 p-0">
+        <div class="modal-header my-2 p-0 d-flex justify-content-between">
           <h3>Заявка № {{ localAppeal.modalHeader.number }} (от {{ localAppeal.modalHeader.date }})</h3>
+          <b v-if="localAppeal.modalHeader.status">Статус: {{ localAppeal.modalHeader.status }}</b>
+          <b v-if="!localAppeal.modalHeader.number">Новая</b>
         </div>
         
         <div class="input-group-1 d-flex mb-6">
@@ -22,7 +24,7 @@
                   v-model="localAppeal.full_address" 
                   :placeholder="!localAppeal.full_address ? 'Не указано' : '' "/>
             </div>
-            <div v-if="getPremisesAutocomplete.length > 0 && formInputs?.apartmentInput?.value !== ''" class="choice position-absolute">
+            <div v-if="getPremisesAutocomplete.length" class="choice position-absolute">
               <div 
                   class="choice-item p-2" 
                   v-for="item in getPremisesAutocomplete" 
@@ -145,8 +147,17 @@
         <button class="d-none" id="setDate" @click="setDateFromAppeal">Set date</button>
         
         <div class="d-flex ms-auto">
-          <button class="main-button mt-4 me-4" @click="changeAppeal(localAppeal)">Сохранить</button>
+          <button class="main-button mt-4 me-4" @click="handleAppealChange(localAppeal)">Сохранить</button>
           <button class="main-button mt-4" @click="closeModal()">Закрыть</button>
+        </div>
+
+        <div v-if="modalLoading" class="position-absolute loader border-radius-8 ease-animation">
+          <div v-if="success" class="border-radius-8 bg-white p-4">
+            <h4 class="green-text-1">Успешно</h4>
+          </div>
+          <div v-else>
+            <img width="128" height="64" src="@/assets/images/loader.gif" alt="Загрузка">
+          </div>
         </div>
       </div>
     </div>
@@ -172,6 +183,8 @@ export default {
   data() {
     return {
       appealModal: null,
+      modalLoading: false,
+      success: false,
       // хотел сделать появление кнопки "сохранить" на изменениях, но хэндлер @input почему-то отменяет ввод первого символа если в нем есть изменение переменной из data(). Не нашел в сети в чем проблема или похожих случаев.
       //formChanged: false,
       myDate: new Date('2000-01-01T00:01:01Z'),
@@ -213,7 +226,6 @@ export default {
           this.$set(this.$data, 'localAppeal', this.$props.appeal);
           this.setDateButton.click();
           this.appealModal.show();
-          console.log(this.localAppeal)
         }
       },
       deep: true,
@@ -256,6 +268,19 @@ export default {
         this.appealModal.hide();
       }
     },
+    handleAppealChange(appeal) {
+      this.modalLoading = true;
+      this.changeAppeal(appeal)
+          .then(response => {
+            this.success = true;
+            setTimeout(() => {
+              this.closeModal();
+              this.success = false;
+              this.modalLoading = false;
+              this.$emit('showEditedAppeal', response.number)
+            }, 1000)
+          })
+    }
   },
   
   mounted() {
@@ -263,6 +288,7 @@ export default {
     this.formInputs.addressInput = this.$el.querySelector('#premiseAddress');
     this.formInputs.apartmentInput = this.$el.querySelector('#apartmentInput');
     this.setDateButton = this.$el.querySelector('#setDate');
+    
     this.appealModal = Modal.getOrCreateInstance(document.querySelector('#appealModal'), {
       backdrop: true,
       keyboard: true,

@@ -233,7 +233,7 @@
         </div>
       </div>
     </div>
-    <AppealModal :appeal="this.modalProps" @clearProps="clearModalProps"/>
+    <AppealModal :appeal="this.modalProps" @clearProps="clearModalProps" @showEditedAppeal="filterByEditedAppeal"/>
   </div>
 </template>
 
@@ -284,6 +284,15 @@ export default {
   
   methods: {
     ...mapActions(["sendAppealsRequest", "sendPremisesRequest"]),
+
+    filterByEditedAppeal(number) {
+      if (number) {
+        this.currentQuery.page = 1;
+        this.currentQuery.premise_id = '';
+        this.currentQuery.search = number;
+        this.searchAppealInput.value = number;
+      }
+    },
 
     searchAppealOnInput() {
       if (this.searchAppealInput) {
@@ -446,7 +455,6 @@ export default {
       if (id) {
         const thisAppeal = this.appealsData.results.find((appeal) => appeal.id === id);
         if (thisAppeal) {
-            console.log(thisAppeal)
             this.prepareDataForModal(thisAppeal)
         }
       }
@@ -458,6 +466,7 @@ export default {
         modalHeader: {
           number: data?.number,
           date: this.getDate(data?.created_at).split(' ')[0],
+          status: data.status.name,
         },
         applicant: this.getApplicant(data),
         phone: data.applicant?.phone,
