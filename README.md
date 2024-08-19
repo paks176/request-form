@@ -1,5 +1,12 @@
 # request-form
 
+## Login & Password for API
+```
+username: "79122333444"
+password: "123456"
+
+```
+
 ## Project setup
 ```
 npm install
