@@ -11,7 +11,7 @@
           <b v-if="localAppeal.modalHeader.status">Статус: {{ localAppeal.modalHeader.status }}</b>
           <b v-if="!localAppeal.modalHeader.number">Новая</b>
         </div>
-        
+
         <div class="input-group-1 d-flex mb-6">
 
           <div class="modal-inputs__item position-relative flex-grow-1 pb-2 me-3">
@@ -19,18 +19,18 @@
               Дом
             </div>
             <div>
-              <input 
-                  data-info="premise_id" 
+              <input
+                  data-info="premise_id"
                   type="text"
                   id="premiseAddress"
                   @input="sendPremisesAutocompleteRequest($event.target.value)"
-                  v-model="localAppeal.full_address" 
+                  v-model="localAppeal.full_address"
                   :placeholder="!localAppeal.full_address ? 'Не указано' : '' "/>
             </div>
             <div v-if="getPremisesAutocomplete.length" class="choice position-absolute">
-              <div 
-                  class="choice-item p-2" 
-                  v-for="item in getPremisesAutocomplete" 
+              <div
+                  class="choice-item p-2"
+                  v-for="item in getPremisesAutocomplete"
                   :key="item.id"
                   @click="applyAddressChoice($event.target, item.id)"
               >
@@ -38,14 +38,14 @@
               </div>
             </div>
           </div>
-          
+
           <div class="modal-inputs__item position-relative flex-grow-1 pb-2 me-3">
             <div class="modal-inputs__item--message green-text-2 mb-2">
               Квартира
             </div>
             <div>
               <input
-                  data-info="apartment" 
+                  data-info="apartment"
                   type="text"
                   id="apartmentInput"
                   @input="sendApartmentAutocompleteRequest({ apartment: $event.target.value, premise: localAppeal.premise_id })"
@@ -63,8 +63,8 @@
               </div>
             </div>
           </div>
-          
-          
+
+
           <div class="modal-inputs__item flex-grow-1 pb-2">
             <div class="modal-inputs__item--message green-text-2 mb-2">
               Срок
@@ -74,24 +74,24 @@
                   data-info="due_date"
                   type="date"
                   @change="onFormChange($event.target)"
-                  id="due_date" 
-                  :value ="myDate && new Date(myDate.getTime()-(myDate.getTimezoneOffset()*60*1000)).toISOString().split('T')[0]" 
+                  id="due_date"
+                  :value ="myDate && new Date(myDate.getTime()-(myDate.getTimezoneOffset()*60*1000)).toISOString().split('T')[0]"
                   @input="myDate = $event.target.valueAsDate"/>
             </div>
           </div>
         </div>
-        
+
         <div class="input-group-2 d-flex mb-6">
           <div class="modal-inputs__item pb-2 me-3">
             <div class="modal-inputs__item--message green-text-2 mb-2">
               Фамилия
             </div>
             <div>
-              <input 
-                  data-info="lastName" 
+              <input
+                  data-info="lastName"
                   type="text"
                   @input="onFormChange($event.target)"
-                  :value="localAppeal.applicant.lastName" 
+                  :value="localAppeal.applicant.lastName"
                   :placeholder="localAppeal.lastName ?? 'Не указано'">
             </div>
           </div>
@@ -101,10 +101,10 @@
             </div>
             <div>
               <input
-                  data-info="firstName" 
-                  type="text" 
-                  @input="onFormChange($event.target)" 
-                  :value="localAppeal.applicant.firstName" 
+                  data-info="firstName"
+                  type="text"
+                  @input="onFormChange($event.target)"
+                  :value="localAppeal.applicant.firstName"
                   :placeholder="localAppeal.firstName ?? 'Не указано'">
             </div>
           </div>
@@ -113,11 +113,11 @@
               Отчество
             </div>
             <div>
-              <input 
-                  data-info="patronymic" 
-                  type="text" 
-                  @input="onFormChange($event.target)" 
-                  :value="localAppeal.applicant.patronymic" 
+              <input
+                  data-info="patronymic"
+                  type="text"
+                  @input="onFormChange($event.target)"
+                  :value="localAppeal.applicant.patronymic"
                   :placeholder="localAppeal.patronymic ?? 'Не указано'">
             </div>
           </div>
@@ -126,10 +126,10 @@
               Телефон
             </div>
             <div>
-              <input 
-                  data-info="phone" 
+              <input
+                  data-info="phone"
                   type="number"
-                  @change="onFormChange($event.target)" 
+                  @change="onFormChange($event.target)"
                   v-model="localAppeal.phone"
                   :placeholder="localAppeal.phone ?? 'Не указано'">
             </div>
@@ -140,17 +140,17 @@
           <div class="modal-inputs__item--message green-text-2 mb-2">
             Описание заявки
           </div>
-          <textarea 
-              data-info="description" 
-              :value="localAppeal.description" 
-              @input="onFormChange($event.target)" 
+          <textarea
+              data-info="description"
+              :value="localAppeal.description"
+              @input="onFormChange($event.target)"
               :placeholder="localAppeal.description ?? 'Не указано'"></textarea>
         </div>
-        
+
         <button class="d-none" id="setDate" @click="setDateFromAppeal">Set date</button>
-        
+
         <div class="d-flex ms-auto">
-          <button class="main-button mt-4 me-4" @click="handleAppealChange(localAppeal)">Сохранить</button>
+          <button :class="{disabled: !formChanged}" class="main-button mt-4 me-4" @click="handleAppealChange(localAppeal)">Сохранить</button>
           <button class="main-button mt-4" @click="closeModal()">Закрыть</button>
         </div>
 
@@ -174,30 +174,29 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 import { Modal } from 'bootstrap';
 export default {
   name: "AppealModal",
-  
+
   props: {
     appeal: null,
   },
-  
+
   computed: {
     ...mapGetters(["getPremisesAutocomplete", "getApartmentAutocomplete"]),
   },
-  
+
   data() {
     return {
       appealModal: null,
       modalLoading: false,
       success: false,
-      // хотел сделать появление кнопки "сохранить" на изменениях, но хэндлер @input почему-то отменяет ввод первого символа если в нем есть изменение переменной из data(). Не нашел в сети в чем проблема или похожих случаев.
-      //formChanged: false,
+      formChanged: false,
       myDate: new Date('2000-01-01T00:01:01Z'),
-      
+
       formInputs: {
         dueDateInput: null,
         addressInput: null,
         apartmentInput: null,
       },
-      
+
       localAppeal: {
         appeal_id: '',
         modalHeader: {
@@ -218,7 +217,7 @@ export default {
         due_date: '',
         premise_id: '',
       },
-      
+
       setDateButton: '',
     }
   },
@@ -232,9 +231,22 @@ export default {
         }
       },
       deep: true,
+    },
+    localAppeal: {
+      // не закончил нормальное отслеживание изменений для отображения кнопки Сохранить, надо больше времени
+      // handler(newValue, oldValue) {
+      //   if (!this.isDefaultValues) {
+      //     console.log(JSON.stringify(newValue));
+      //     console.log(JSON.stringify(oldValue));
+      //     if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+      //       this.formChanged = true;
+      //     }
+      //   }
+      // },
+      // deep: true,
     }
   },
-   
+
   methods: {
     ...mapActions([
       "sendPremisesAutocompleteRequest",
@@ -243,6 +255,7 @@ export default {
     ]),
     ...mapMutations(["setPremisesAutocomplete", "setApartmentAutocomplete"]),
     onFormChange(target) {
+      this.formChanged = true;
       if (target.dataset.info === 'firstName' || target.dataset.info === 'lastName' || target.dataset.info === 'patronymic') {
         this.localAppeal.applicant[target.dataset.info] = target.value;
       } else {
@@ -254,6 +267,7 @@ export default {
         this.localAppeal.full_address = target.innerText;
         this.localAppeal.premise_id = id;
         this.setPremisesAutocomplete([]);
+        this.formChanged = true;
       }
     },
     applyApartmentChoice(target, id) {
@@ -261,6 +275,7 @@ export default {
         this.localAppeal.apartment = target.innerText;
         this.localAppeal.apartment_id = id;
         this.setApartmentAutocomplete([]);
+        this.formChanged = true;
       }
     },
     setDateFromAppeal() {
@@ -278,11 +293,11 @@ export default {
     },
     handleAppealChange(appeal) {
       this.modalLoading = true;
-      
+
       if (appeal.due_date) {
         appeal.due_date = new Date(appeal.due_date).toISOString();
       }
-      
+
       this.changeOrCreateAppeal(appeal)
           .then(response => {
             this.success = true;
@@ -295,22 +310,23 @@ export default {
           })
     }
   },
-  
+
   mounted() {
     this.formInputs.dueDateInput = this.$el.querySelector('#due_date');
     this.formInputs.addressInput = this.$el.querySelector('#premiseAddress');
     this.formInputs.apartmentInput = this.$el.querySelector('#apartmentInput');
     this.setDateButton = this.$el.querySelector('#setDate');
-    
+
     this.appealModal = Modal.getOrCreateInstance(document.querySelector('#appealModal'), {
       backdrop: true,
       keyboard: true,
     });
-    
+
     this.myDate = new Date(this.myDate.setDate(this.myDate.getDate() + 1));
 
     this.$el.querySelector('#appealModal').addEventListener('hidden.bs.modal', () => {
       this.$emit('clearProps');
+      this.formChanged = false;
       this.setPremisesAutocomplete([]);
       this.setApartmentAutocomplete([]);
     })

@@ -67,6 +67,11 @@ button {
   box-shadow: 0 4px 4px 0 rgba(106, 174, 94, 0.25);
 }
 
+.main-button.disabled {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
 .box-shadow {
   box-shadow: 0 4px 4px 0 rgba(106, 174, 94, 0.25);
 }
