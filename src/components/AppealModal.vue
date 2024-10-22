@@ -176,7 +176,10 @@ export default {
   name: "AppealModal",
 
   props: {
-    appeal: null,
+    appeal: {
+      type: Object,
+      required: false,
+    },
   },
 
   computed: {
@@ -222,12 +225,14 @@ export default {
     }
   },
   watch: {
-    $props: {
-      handler() {
-        if (this.$props.appeal) {
-          this.$set(this.$data, 'localAppeal', this.$props.appeal);
-          this.setDateButton.click();
-          this.appealModal.show();
+    '$props.appeal': {
+      handler(newValue) {
+        if (Object.keys(this.$props.appeal).length) {
+          this.$nextTick(() => {
+            this.$set(this.$data, 'localAppeal', newValue);
+            this.setDateButton.click();
+            this.appealModal.show();
+          })
         }
       },
       deep: true,
@@ -329,7 +334,7 @@ export default {
       this.formChanged = false;
       this.setPremisesAutocomplete([]);
       this.setApartmentAutocomplete([]);
-    })
+    });
   }
 }
 </script>

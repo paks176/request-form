@@ -41,7 +41,7 @@
         <div v-if="!this.appealsData.results.length && !loading" class="p-5 d-flex justify-content-center align-items-center w-100">
           <h2>Нет результатов</h2>
         </div>
-        
+
         <div v-else>
           <table class="w-100 mb-6">
             <tr>
@@ -144,7 +144,7 @@
                 </label>
               </th>
             </tr>
-            
+
             <tr v-for="appeal in this.appealsData.results" :key="appeal.id">
               <td>
                 <button class="border-radius-4 cursor-pointer" @click="showAppeal(appeal.id)">{{ appeal.number }}</button>
@@ -243,19 +243,19 @@ import AppealModal from "@/components/AppealModal.vue";
 
 export default {
   name: "RequestsList",
-  
+
   components: {
     AppealModal,
   },
-  
+
   computed: {
     ...mapGetters(["getAppealsList", "getAuthStatus", "getPremisesData"]),
   },
-  
+
   data() {
     return {
       loading: true,
-      
+
       currentQuery: {
         page_size: '10',
         page: '1',
@@ -273,18 +273,18 @@ export default {
         pages: '',
       },
       premisesData: [],
-      
+
       searchAppealInput: null,
       pageSizeSelect: null,
       premiseSelect: null,
-      
-      modalProps: null,
+
+      modalProps: {},
     }
   },
-  
+
   methods: {
     ...mapActions(["sendAppealsRequest", "sendPremisesRequest"]),
-    
+
     ...mapMutations(["sortBy", "pushNewToast"]),
 
     filterByEditedAppeal(response) {
@@ -311,7 +311,7 @@ export default {
         this.currentQuery.page = 1;
       }
     },
-    
+
     choosePremise() {
       if (this.premiseSelect) {
         const selected = this.premiseSelect.selectedIndex;
@@ -373,6 +373,7 @@ export default {
     },
 
     getApplicant(appeal) {
+
       let result = {
         firstName: '',
         lastName: '',
@@ -380,20 +381,38 @@ export default {
         patronymic: '',
       };
 
-      const getName = (name) => {
-        if (name && name.startsWith('user_')) {
-          return name.split('_')[1];
-        } else return name;
+      if (!appeal.created_by) {
+        result = {
+          firstName: '',
+          lastName: '',
+          userName: '',
+          patronymic: '',
+        };
+      } else {
+        const getName = (name) => {
+          if (name && name.startsWith('user_')) {
+            return name.split('_')[1];
+          } else return name;
+        }
+
+        appeal.created_by.first_name ? result.firstName = getName(appeal.created_by.first_name) : result.firstName = '';
+
+        appeal.created_by.last_name ? result.lastName = getName(appeal.created_by.last_name) : result.lastName = '';
+
+        appeal.created_by.patronymic ? result.patronymic = getName(appeal.created_by.patronymic) : result.patronymic = '';
+
+        appeal.created_by.username ? result.userName = appeal.created_by.username : result.userName = '';
       }
-      
-      appeal.created_by.first_name ? result.firstName = getName(appeal.created_by.first_name) : result.firstName = null;
 
-      appeal.created_by.last_name ? result.lastName = getName(appeal.created_by.last_name) : result.lastName = null;
+      if (
+          !result.firstName &&
+          !result.lastName &&
+          !result.userName &&
+          !result.patronymic
+      ) {
+        result.userName = 'Не указано';
+      }
 
-      appeal.created_by.patronymic? result.patronymic = getName(appeal.created_by.patronymic) : result.patronymic = null;
-
-      appeal.created_by.username ? result.userName = appeal.created_by.username : result.userName = null;
-      
       return result;
     },
 
@@ -402,7 +421,7 @@ export default {
         const objData = new Date(date);
         const makeTwoDigits = (value) => {
           if (String(value).length === 1) {
-              return '0' + value; 
+              return '0' + value;
           } else return value;
         }
         return makeTwoDigits(objData.getDate()) + '.'
@@ -470,7 +489,7 @@ export default {
       }
       this.prepareDataForModal(thisAppeal)
     },
-    
+
     prepareDataForModal(data) {
       if (data?.id) {
         // если редактируем
@@ -514,14 +533,14 @@ export default {
           status_id: 1,
         };
       }
-      
+
     },
 
     clearModalProps() {
-     this.modalProps = null; 
+     this.modalProps = null;
     }
   },
-  
+
   watch: {
     'currentQuery': {
       handler: function () {
@@ -530,12 +549,12 @@ export default {
       deep: true
     }
   },
-  
+
   mounted() {
     if (this.getAuthStatus) {
       this.premiseSelect = this.$el.querySelector('select#premiseSelect');
       this.searchAppealInput = this.$el.querySelector('#searchAppealInput');
-      
+
       this.sendPremisesRequest().then(() => {
         this.$set(this.premisesData, 'results', this.getPremisesData?.results);
       })

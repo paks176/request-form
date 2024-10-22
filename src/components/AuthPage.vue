@@ -40,7 +40,7 @@
                           fill="#757575"/>
                     </svg>
                     <input required type="password" v-model="passwordValue">
-                    <div id="switchButton" @click="switchPasswordVisibility" class="p-0">
+                    <div id="switchButton" @click="switchPasswordVisibility" class="p-0 cursor-pointer">
                       <svg class="ms-6" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path
                             class="ease-animation"
