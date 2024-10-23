@@ -8,7 +8,7 @@ const routes = [
     },
     {
         name: 'Requests',
-        path: '/',
+        path: '/requests',
         component: () => import('../components/RequestsList.vue'),
     },
     {
